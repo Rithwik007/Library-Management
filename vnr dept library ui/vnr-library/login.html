@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — VNR VJIET Library</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --vnr-blue: #1a3a6b;
+      --vnr-gold: #f5a623;
+      --vnr-dark: #0d1f3c;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+      background: var(--vnr-dark);
+    }
+
+    /* LEFT PANEL */
+    .left-panel {
+      background: linear-gradient(160deg, var(--vnr-dark) 0%, var(--vnr-blue) 100%);
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-start;
+      padding: 4rem;
+      position: relative; overflow: hidden;
+    }
+    .left-panel::before {
+      content: '';
+      position: absolute; top: -100px; right: -100px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(245,166,35,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .left-panel::after {
+      content: '';
+      position: absolute; bottom: -80px; left: -80px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .left-logo { display: flex; align-items: center; gap: 14px; margin-bottom: 3rem; z-index: 1; }
+    .left-logo img { height: 60px; border-radius: 8px; }
+    .left-logo-text span:first-child { display: block; font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: #fff; }
+    .left-logo-text span:last-child { display: block; font-size: 0.75rem; color: var(--vnr-gold); letter-spacing: 1.5px; text-transform: uppercase; }
+    .left-panel h1 { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 900; color: #fff; line-height: 1.15; margin-bottom: 1rem; z-index: 1; }
+    .left-panel h1 span { color: var(--vnr-gold); }
+    .left-panel p { color: rgba(255,255,255,0.65); font-size: 1rem; line-height: 1.7; max-width: 380px; z-index: 1; margin-bottom: 2.5rem; }
+    .left-features { z-index: 1; }
+    .left-features div { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 10px; }
+    .left-features div span:first-child { font-size: 1.1rem; }
+
+    /* RIGHT PANEL */
+    .right-panel {
+      background: #f8faff;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 3rem;
+    }
+    .login-box { width: 100%; max-width: 420px; }
+    .login-box h2 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: var(--vnr-dark); margin-bottom: 0.4rem; }
+    .login-box p { color: #6b7a99; font-size: 0.9rem; margin-bottom: 2rem; }
+
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--vnr-blue); margin-bottom: 6px; letter-spacing: 0.3px; }
+    .form-group select,
+    .form-group input {
+      width: 100%; padding: 12px 16px;
+      border: 2px solid #e2e8f4; border-radius: 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--vnr-dark);
+      background: #fff; outline: none; transition: all 0.2s;
+      appearance: none;
+    }
+    .form-group select:focus,
+    .form-group input:focus { border-color: var(--vnr-blue); box-shadow: 0 0 0 3px rgba(26,58,107,0.08); }
+
+    .login-btn {
+      width: 100%; padding: 14px;
+      background: var(--vnr-blue); color: #fff;
+      border: none; border-radius: 10px; font-size: 1rem;
+      font-family: 'DM Sans', sans-serif; font-weight: 600;
+      cursor: pointer; transition: all 0.3s; margin-top: 0.5rem;
+      letter-spacing: 0.3px;
+    }
+    .login-btn:hover { background: var(--vnr-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(13,31,60,0.25); }
+    .login-btn:active { transform: translateY(0); }
+
+    .divider { text-align: center; color: #aab; font-size: 0.8rem; margin: 1.2rem 0; }
+    .credentials-hint {
+      background: rgba(26,58,107,0.05); border: 1px solid rgba(26,58,107,0.1);
+      border-radius: 10px; padding: 1rem 1.2rem; margin-top: 1.2rem;
+    }
+    .credentials-hint p { font-size: 0.78rem; color: #6b7a99; margin-bottom: 6px; font-weight: 600; letter-spacing: 0.3px; }
+    .credentials-hint div { font-size: 0.8rem; color: var(--vnr-blue); display: flex; justify-content: space-between; padding: 3px 0; }
+
+    .back-link { display: block; text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: #6b7a99; text-decoration: none; }
+    .back-link:hover { color: var(--vnr-blue); }
+
+    .error-msg {
+      background: #fff0f0; border: 1px solid #ffcccc;
+      color: #c0392b; padding: 10px 14px; border-radius: 8px;
+      font-size: 0.85rem; margin-bottom: 1rem; display: none;
+    }
+
+    @media (max-width: 768px) {
+      body { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LEFT -->
+<div class="left-panel">
+  <div class="left-logo">
+    <img src="assets/logo.png" alt="VNR VJIET"/>
+    <div class="left-logo-text">
+      <span>VNR VJIET</span>
+      <span>Central Library</span>
+    </div>
+  </div>
+  <h1>Welcome to<br/><span>VNR Library</span><br/>Portal</h1>
+  <p>Access the complete digital library management system of Vallurupalli Nageswara Rao Vignana Jyothi Institute.</p>
+  <div class="left-features">
+    <div><span>📚</span><span>956+ Books across all departments</span></div>
+    <div><span>🔄</span><span>Borrow, return and track books</span></div>
+    <div><span>📊</span><span>Real-time activity monitoring</span></div>
+    <div><span>☁️</span><span>Powered by MongoDB Atlas</span></div>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="right-panel">
+  <div class="login-box">
+    <h2>Sign In</h2>
+    <p>Enter your credentials to access the library portal</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="form-group">
+      <label>ROLE</label>
+      <select id="role">
+        <option value="">Select your role</option>
+        <option value="admin">Admin</option>
+        <option value="faculty">Faculty / Professor</option>
+        <option value="student">Student</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>EMAIL ADDRESS</label>
+      <input type="email" id="email" placeholder="your@college.edu"/>
+    </div>
+    <div class="form-group">
+      <label>PASSWORD</label>
+      <input type="password" id="password" placeholder="Enter your password"/>
+    </div>
+
+    <button class="login-btn" onclick="login()">Sign In to Library Portal</button>
+
+
+
+    <a href="index.html" class="back-link">← Back to Homepage</a>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+
+async function login() {
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+  const role     = document.getElementById('role').value;
+  const errorMsg = document.getElementById('errorMsg');
+  const btn      = document.querySelector('.login-btn');
+
+  errorMsg.style.display = 'none';
+
+  if (!email || !password) {
+    errorMsg.textContent = 'Please enter your email and password.';
+    errorMsg.style.display = 'block'; return;
+  }
+
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+
+  try {
+    const res  = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      errorMsg.textContent = data.message || 'Login failed. Please check your credentials.';
+      errorMsg.style.display = 'block';
+      btn.textContent = 'Sign In to Library Portal'; btn.disabled = false;
+      return;
+    }
+
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+
+    // Redirect based on role
+    const userRole = data.user.role;
+    if (userRole === 'admin')   window.location.href = 'admin-dashboard.html';
+    else if (userRole === 'faculty') window.location.href = 'faculty-dashboard.html';
+    else window.location.href = 'student-dashboard.html';
+
+  } catch (err) {
+    errorMsg.textContent = 'Cannot connect to server. Make sure backend is running on port 5000.';
+    errorMsg.style.display = 'block';
+    btn.textContent = 'Sign In to Library Portal'; btn.disabled = false;
+  }
+}
+
+// Allow Enter key
+document.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+</script>
+</body>
+</html>
