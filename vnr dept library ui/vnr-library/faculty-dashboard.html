@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty Dashboard — VNR VJIET Department Library</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    :root {
+      --vnr-blue: #1a3a6b;
+      --vnr-gold: #f5a623;
+      --vnr-dark: #0d1f3c;
+      --sidebar-w: 260px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #f0f4fb;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--vnr-dark);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 50;
+    }
+
+    .sidebar-brand {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-brand img {
+      height: 40px;
+      border-radius: 6px;
+    }
+
+    .sidebar-brand-text span:first-child {
+      display: block;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .sidebar-brand-text span:last-child {
+      display: block;
+      color: var(--vnr-gold);
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-user {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #2ed573, #1e9e52);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .uname {
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .urole {
+      color: #2ed573;
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 1rem 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 1.5rem;
+      color: rgba(255, 255, 255, 0.65);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-item.active {
+      color: #fff;
+      background: rgba(46, 213, 115, 0.1);
+      border-left-color: #2ed573;
+    }
+
+    .sidebar-footer {
+      padding: 1.2rem 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      background: none;
+      border: none;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .logout-btn:hover {
+      color: #ff6b6b;
+    }
+
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    .topbar h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .badge-faculty {
+      background: rgba(46, 213, 115, 0.15);
+      color: #1a9145;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .content {
+      padding: 2rem;
+      flex: 1;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 0.7rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #e2e8f4;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--vnr-blue);
+    }
+
+    .books-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .book-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.4rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+      border: 1px solid #edf2fc;
+    }
+
+    .book-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(26, 58, 107, 0.1);
+    }
+
+    .book-num {
+      font-size: 0.75rem;
+      color: var(--vnr-gold);
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .book-title {
+      font-weight: 700;
+      color: var(--vnr-dark);
+      font-size: 1rem;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .book-author {
+      font-size: 0.82rem;
+      color: #6b7a99;
+      margin-bottom: 12px;
+    }
+
+    .book-meta {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .meta-tag {
+      background: #f0f4fb;
+      color: var(--vnr-blue);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .meta-avail {
+      background: rgba(46, 213, 115, 0.12);
+      color: #1a9145;
+    }
+
+    .meta-unavail {
+      background: rgba(255, 107, 107, 0.12);
+      color: #c0392b;
+    }
+
+    .book-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-read {
+      background: #f0f4fb;
+      color: var(--vnr-blue);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .btn-borrow {
+      background: var(--vnr-blue);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .btn-read:hover {
+      background: #e2e8f4;
+    }
+
+    .btn-borrow:hover {
+      background: var(--vnr-dark);
+    }
+
+    .btn-disabled {
+      background: #f5f5f5;
+      color: #aaa;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      cursor: not-allowed;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 1.5rem;
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--vnr-dark);
+      margin-bottom: 1.2rem;
+    }
+
+    .log-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f7fc;
+    }
+
+    .log-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .log-borrow {
+      background: rgba(255, 107, 107, 0.1);
+    }
+
+    .log-read {
+      background: rgba(100, 181, 246, 0.1);
+    }
+
+    .log-return {
+      background: rgba(46, 213, 115, 0.1);
+    }
+
+    .log-return {
+      background: rgba(46, 213, 115, 0.1);
+    }
+
+    .btn-return {
+      background: #2ed573;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-return:hover {
+      background: #1e9e52;
+    }
+
+    .log-info .log-book {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--vnr-dark);
+    }
+
+    .log-info .log-time {
+      font-size: 0.78rem;
+      color: #6b7a99;
+      margin-top: 2px;
+    }
+
+    .log-badge {
+      margin-left: auto;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .loading {
+      text-align: center;
+      color: #6b7a99;
+      padding: 2rem;
+    }
+
+    .empty {
+      text-align: center;
+      color: #6b7a99;
+      padding: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .text-danger {
+      color: #ff4757 !important;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/logo.png" alt="VNR" />
+      <div class="sidebar-brand-text"><span>VNR VJIET</span><span>Faculty Portal</span></div>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar" id="avatarLetter">F</div>
+      <div class="uname" id="sidebarName">Faculty</div>
+      <div class="urole">Faculty Member</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showTab('books', this)"><span>📚</span><span>Browse Books</span></div>
+      <div class="nav-item" onclick="showTab('history', this)"><span>📋</span><span>My History</span></div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="logout()"><span>🚪</span><span>Sign Out</span></button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <h1 id="pageTitle">Browse Books</h1>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <span class="badge-faculty">FACULTY</span>
+        <span id="topbarName" style="font-size:0.9rem;color:#6b7a99;"></span>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- BOOKS -->
+      <div class="tab-content active" id="tab-books">
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Search books by title, author or number..."
+            oninput="filterBooks()" />
+        </div>
+        <div class="books-grid" id="booksGrid">
+          <div class="loading">Loading books...</div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="tab-content" id="tab-history">
+        <div class="card">
+          <h3>My Activity History</h3>
+          <div id="historyList">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:5000/api';
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!token || user.role !== 'faculty') window.location.href = 'login.html';
+
+    document.getElementById('sidebarName').textContent = user.name || 'Faculty';
+    document.getElementById('topbarName').textContent = user.name || '';
+    document.getElementById('avatarLetter').textContent = (user.name || 'F')[0].toUpperCase();
+
+    function apiFetch(url, opts = {}) {
+      return fetch(`${API}${url}`, { ...opts, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...opts.headers } });
+    }
+
+    function formatDate(str) {
+      if (!str || str === '-') return '-';
+      if (/^\d{2} [A-Z][a-z]{2} \d{4}, \d{2}:\d{2}:\d{2}$/.test(str)) return str;
+      try {
+        const d = new Date(str);
+        if (isNaN(d.getTime())) return str;
+        const options = { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+        return new Intl.DateTimeFormat('en-GB', options).format(d).replace(',', '');
+      } catch (e) { return str; }
+    }
+
+    function getDueStatus(dueDateStr, status) {
+      if (!dueDateStr || dueDateStr === '-' || status !== 'active') return null;
+      try {
+        const due = new Date(dueDateStr.replace(',', ''));
+        const now = new Date();
+        const diffTime = due - now;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const isUrgent = diffDays < 5;
+
+        // Format to dd-mm-yy
+        const dd = String(due.getDate()).padStart(2, '0');
+        const mm = String(due.getMonth() + 1).padStart(2, '0');
+        const yy = String(due.getFullYear()).substring(2);
+        const shortDate = `${dd}-${mm}-${yy}`;
+
+        return {
+          text: `${shortDate} (${diffDays < 0 ? 'Overdue' : diffDays + ' days left'})`,
+          isUrgent
+        };
+      } catch (e) { return null; }
+    }
+
+    function showTab(tab, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      el.classList.add('active');
+      const titles = { books: 'Browse Books', history: 'My History' };
+      document.getElementById('pageTitle').textContent = titles[tab];
+      if (tab === 'history') loadHistory();
+    }
+
+    let allBooks = [];
+    async function loadBooks() {
+      try {
+        const res = await apiFetch('/books');
+        allBooks = await res.json();
+        renderBooks(allBooks);
+      } catch (e) { document.getElementById('booksGrid').innerHTML = '<div class="empty">Failed to load books</div>'; }
+    }
+
+    function renderBooks(books) {
+      const grid = document.getElementById('booksGrid');
+      if (!books.length) { grid.innerHTML = '<div class="empty">No books found</div>'; return; }
+      grid.innerHTML = books.map(b => `
+    <div class="book-card">
+      <div class="book-num">${b.bookNumber || 'N/A'}</div>
+      <div class="book-title">${b.title}</div>
+      <div class="book-author">${b.author || 'Unknown Author'}</div>
+      <div class="book-meta">
+        <span class="meta-tag">📚 Total: ${b.totalCopies}</span>
+        <span class="meta-tag ${b.availableCopies > 0 ? 'meta-avail' : 'meta-unavail'}">
+          ${b.availableCopies > 0 ? '✓ ' + b.availableCopies + ' Available' : '✗ Unavailable'}
+        </span>
+      </div>
+      <div class="book-btns">
+        <button class="btn-read" onclick="readBook('${b._id}','${b.title.replace(/'/g, "\\'")}')">📖 Stay & Read</button>
+        ${b.availableCopies > 0
+          ? `<button class="btn-borrow" onclick="borrowBook('${b._id}','${b.title.replace(/'/g, "\\'")}')">📦 Take Book</button>`
+          : `<button class="btn-disabled">Not Available</button>`}
+      </div>
+    </div>`).join('');
+    }
+
+    function filterBooks() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      renderBooks(allBooks.filter(b =>
+        b.title?.toLowerCase().includes(q) ||
+        b.author?.toLowerCase().includes(q) ||
+        b.bookNumber?.toLowerCase().includes(q)
+      ));
+    }
+
+    async function borrowBook(bookId, title) {
+      if (!(await VnrUI.showConfirm(`Borrow "${title}"?\nDue date will be 14 days from today.`, "Confirm Borrowing"))) return;
+      try {
+        const res = await apiFetch('/transactions/borrow', { method: 'POST', body: JSON.stringify({ bookId }) });
+        const data = await res.json();
+        if (!res.ok) { await VnrUI.showError(data.message); return; }
+        await VnrUI.showSuccess(`Successfully borrowed!\nDue: ${formatDate(data.dueDate)}`);
+        loadBooks();
+      } catch (e) { await VnrUI.showError('Error borrowing book.'); }
+    }
+
+    async function readBook(bookId, title) {
+      try {
+        const res = await apiFetch('/transactions/reading', { method: 'POST', body: JSON.stringify({ bookId }) });
+        const data = await res.json();
+        if (!res.ok) { await VnrUI.showError(data.message); return; }
+        await VnrUI.showSuccess(`Reading session logged for "${title}"`);
+      } catch (e) { await VnrUI.showError('Error logging session.'); }
+    }
+
+    async function loadHistory() {
+      try {
+        const res = await apiFetch('/transactions/my');
+        const logs = await res.json();
+        const el = document.getElementById('historyList');
+        if (!logs.length) { el.innerHTML = '<div class="empty">No activity yet</div>'; return; }
+        el.innerHTML = logs.map(l => {
+          const icon = l.type === 'borrow' ? '📦' : l.status === 'returned' ? '✅' : '📖';
+          const cls = l.type === 'borrow' ? 'log-borrow' : l.status === 'returned' ? 'log-return' : 'log-read';
+          const statusColor = l.status === 'reading' ? '#f5a623' : l.status === 'active' ? '#1a3a6b' : '#2ed573';
+          const dueData = getDueStatus(l.dueDate, l.status);
+
+          return `<div class="log-item">
+        <div class="log-icon ${cls}">${icon}</div>
+        <div class="log-info" style="flex:1">
+          <div class="log-book">${l.bookTitle}</div>
+          <div class="log-time">${formatDate(l.createdAt)} — Status: <strong style="color:${statusColor}">${l.status.toUpperCase()}</strong></div>
+          ${dueData ? `<div class="log-time ${dueData.isUrgent ? 'text-danger' : ''}">Due: ${dueData.text}</div>` : ''}
+          ${(l.status === 'reading' || l.status === 'active') ? `<button class="btn-return" onclick="returnBook('${l._id}')">Return Book</button>` : ''}
+        </div>
+        <span class="log-badge" style="background:rgba(26,58,107,0.1);color:var(--vnr-blue)">${l.type.toUpperCase()}</span>
+      </div>`;
+        }).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    async function returnBook(trId) {
+      if (!(await VnrUI.showConfirm('Are you returning this book?', 'Confirm Return'))) return;
+      try {
+        const res = await apiFetch('/transactions/return', { method: 'POST', body: JSON.stringify({ transactionId: trId }) });
+        if (!res.ok) { const d = await res.json(); await VnrUI.showError(d.message); return; }
+        await VnrUI.showSuccess('Book returned. Availability updated.');
+        loadHistory();
+        loadBooks();
+      } catch (e) { await VnrUI.showError('Error returning book.'); }
+    }
+
+    function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+    loadBooks();
+  </script>
+  <script src="js/vnr-ui.js"></script>
+</body>
+
+</html>
