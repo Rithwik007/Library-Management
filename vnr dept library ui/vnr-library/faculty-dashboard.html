@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Faculty Dashboard — VNR VJIET Library</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap"
+  <title>Faculty Dashboard — VNR VJIET Department Library</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
   <style>
     :root {
       --vnr-blue: #1a3a6b;
@@ -23,7 +23,7 @@
     }
 
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Outfit', sans-serif;
       background: #f0f4fb;
       display: flex;
       min-height: 100vh;
@@ -145,7 +145,7 @@
       transition: color 0.2s;
       background: none;
       border: none;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Outfit', sans-serif;
     }
 
     .logout-btn:hover {
@@ -169,9 +169,8 @@
     }
 
     .topbar h1 {
-      font-family: 'Playfair Display', serif;
       font-size: 1.4rem;
-      color: var(--vnr-dark);
+      font-weight: 700;
     }
 
     .badge-faculty {
@@ -595,23 +594,23 @@
     }
 
     async function borrowBook(bookId, title) {
-      if (!confirm(`Borrow "${title}"?\nDue date will be 14 days from today.`)) return;
+      if (!(await VnrUI.showConfirm(`Borrow "${title}"?\nDue date will be 14 days from today.`, "Confirm Borrowing"))) return;
       try {
         const res = await apiFetch('/transactions/borrow', { method: 'POST', body: JSON.stringify({ bookId }) });
         const data = await res.json();
-        if (!res.ok) { alert('❌ ' + data.message); return; }
-        alert(`✅ Successfully borrowed!\nDue: ${formatDate(data.dueDate)}`);
+        if (!res.ok) { await VnrUI.showError(data.message); return; }
+        await VnrUI.showSuccess(`Successfully borrowed!\nDue: ${formatDate(data.dueDate)}`);
         loadBooks();
-      } catch (e) { alert('Error borrowing book.'); }
+      } catch (e) { await VnrUI.showError('Error borrowing book.'); }
     }
 
     async function readBook(bookId, title) {
       try {
         const res = await apiFetch('/transactions/reading', { method: 'POST', body: JSON.stringify({ bookId }) });
         const data = await res.json();
-        if (!res.ok) { alert('❌ ' + data.message); return; }
-        alert(`📖 Reading session logged for "${title}"`);
-      } catch (e) { alert('Error logging session.'); }
+        if (!res.ok) { await VnrUI.showError(data.message); return; }
+        await VnrUI.showSuccess(`Reading session logged for "${title}"`);
+      } catch (e) { await VnrUI.showError('Error logging session.'); }
     }
 
     async function loadHistory() {
@@ -641,19 +640,20 @@
     }
 
     async function returnBook(trId) {
-      if (!confirm('Are you returning this book?')) return;
+      if (!(await VnrUI.showConfirm('Are you returning this book?', 'Confirm Return'))) return;
       try {
         const res = await apiFetch('/transactions/return', { method: 'POST', body: JSON.stringify({ transactionId: trId }) });
-        if (!res.ok) { const d = await res.json(); alert('❌ ' + d.message); return; }
-        alert('✅ Book returned. Availability updated.');
+        if (!res.ok) { const d = await res.json(); await VnrUI.showError(d.message); return; }
+        await VnrUI.showSuccess('Book returned. Availability updated.');
         loadHistory();
         loadBooks();
-      } catch (e) { alert('Error returning book.'); }
+      } catch (e) { await VnrUI.showError('Error returning book.'); }
     }
 
     function logout() { localStorage.clear(); window.location.href = 'login.html'; }
     loadBooks();
   </script>
+  <script src="js/vnr-ui.js"></script>
 </body>
 
 </html>

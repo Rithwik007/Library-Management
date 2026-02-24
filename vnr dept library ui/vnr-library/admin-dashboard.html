@@ -5,9 +5,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard — VNR VJIET Library</title>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
   <style>
     :root {
       --vnr-blue: #1a3a6b;
@@ -23,7 +23,7 @@
     }
 
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Outfit', sans-serif;
       background: #f0f4fb;
       display: flex;
       min-height: 100vh;
@@ -150,7 +150,7 @@
       transition: color 0.2s;
       background: none;
       border: none;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Outfit', sans-serif;
     }
 
     .logout-btn:hover {
@@ -175,9 +175,8 @@
     }
 
     .topbar h1 {
-      font-family: 'Playfair Display', serif;
       font-size: 1.4rem;
-      color: var(--vnr-dark);
+      font-weight: 700;
     }
 
     .topbar-right {
@@ -226,6 +225,7 @@
       align-items: center;
       gap: 1rem;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
     }
 
     .stat-icon {
@@ -386,6 +386,25 @@
       color: #ff4757 !important;
       font-weight: 700;
     }
+
+    /* USER TABS */
+    .user-tab-btn {
+      padding: 6px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #6b7a99;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .user-tab-btn.active {
+      background: #fff;
+      color: var(--vnr-blue);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
   </style>
 </head>
 
@@ -397,7 +416,7 @@
       <img src="assets/logo.png" alt="VNR" />
       <div class="sidebar-brand-text">
         <span>VNR VJIET</span>
-        <span>Library Admin</span>
+        <span>Department Library Admin</span>
       </div>
     </div>
     <div class="sidebar-user">
@@ -430,7 +449,7 @@
 
       <!-- OVERVIEW -->
       <div class="tab-content active" id="tab-overview">
-        <div class="stats-grid">
+        <div class="stats-grid reveal">
           <div class="stat-card">
             <div class="stat-icon stat-blue">📚</div>
             <div class="stat-info">
@@ -446,17 +465,17 @@
             </div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon stat-gold">👥</div>
-            <div class="stat-info">
-              <div class="num" id="totalUsers">—</div>
-              <div class="lbl">Total Users</div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon stat-red">📋</div>
+            <div class="stat-icon stat-gold">📋</div>
             <div class="stat-info">
               <div class="num" id="totalLogs">—</div>
               <div class="lbl">Activity Logs</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-red">📅</div>
+            <div class="stat-info">
+              <div class="num" id="todayLogs">—</div>
+              <div class="lbl">Today's Logs</div>
             </div>
           </div>
         </div>
@@ -474,7 +493,7 @@
       <div class="tab-content" id="tab-books">
         <div class="card">
           <div class="card-header">
-            <h3>All Books (956+)</h3>
+            <h3 id="booksHeader">All Books</h3>
           </div>
           <div class="search-bar">
             <input type="text" id="bookSearch" placeholder="Search by title, author or book number..."
@@ -489,8 +508,13 @@
       <!-- USERS -->
       <div class="tab-content" id="tab-users">
         <div class="card">
-          <div class="card-header">
-            <h3>All Users</h3>
+          <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
+            <h3>User Directory</h3>
+            <div style="display: flex; gap: 0.5rem; background: #f0f4fb; padding: 4px; border-radius: 8px;">
+              <button class="user-tab-btn active" onclick="filterUsers('all')">All</button>
+              <button class="user-tab-btn" onclick="filterUsers('faculty')">Faculty</button>
+              <button class="user-tab-btn" onclick="filterUsers('student')">Students</button>
+            </div>
           </div>
           <div id="usersTable">
             <div class="loading">Loading users...</div>
@@ -587,14 +611,16 @@
 
     async function loadOverview() {
       try {
-        const [booksRes, transRes] = await Promise.all([
-          apiFetch('/books'), apiFetch('/transactions/all')
+        const [statsRes, transRes] = await Promise.all([
+          apiFetch('/stats'), apiFetch('/transactions/all')
         ]);
-        const books = await booksRes.json();
+        const stats = await statsRes.json();
         const transactions = await transRes.json();
-        document.getElementById('totalBooks').textContent = books.length;
-        document.getElementById('availBooks').textContent = books.filter(b => b.availableCopies > 0).length;
-        document.getElementById('totalLogs').textContent = transactions.length;
+
+        document.getElementById('totalBooks').textContent = stats.totalBooks;
+        document.getElementById('availBooks').textContent = stats.availableBooks;
+        document.getElementById('totalLogs').textContent = stats.totalLogs;
+        document.getElementById('todayLogs').textContent = stats.todayLogs;
 
         let html = '<table><thead><tr><th>User</th><th>Book</th><th>Type</th><th>Taken</th><th>Due Date</th><th>Returned</th></tr></thead><tbody>';
         transactions.slice(0, 10).forEach(t => {
@@ -626,6 +652,7 @@
     }
 
     function renderBooksTable(books) {
+      document.getElementById('booksHeader').textContent = `All Books (${books.length})`;
       document.getElementById('totalBooks').textContent = books.length;
       let html = '<table><thead><tr><th>Book No.</th><th>Title</th><th>Author</th><th>Publisher</th><th>Total</th><th>Available</th><th>Status</th></tr></thead><tbody>';
       books.forEach(b => {
@@ -653,14 +680,40 @@
       renderBooksTable(filtered);
     }
 
+    let allUsers = [];
     async function loadUsers() {
       const el = document.getElementById('usersTable');
+      el.innerHTML = '<div class="loading">Loading...</div>';
       try {
-        const res = await apiFetch('/books');
-        const books = await res.json();
-        document.getElementById('totalUsers').textContent = '31+';
-        el.innerHTML = '<div class="empty">User management coming soon. Check MongoDB Compass to manage users.</div>';
-      } catch (e) { }
+        const res = await apiFetch('/users');
+        allUsers = await res.json();
+        renderUsersTable(allUsers);
+      } catch (e) { el.innerHTML = '<div class="empty">Failed to load users</div>'; }
+    }
+
+    function renderUsersTable(users) {
+      let html = '<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Dept / ID</th><th>Status</th></tr></thead><tbody>';
+      users.forEach(u => {
+        const badgeClass = `badge-${u.role}`;
+        const idInfo = u.role === 'faculty' ? (u.employeeId || u.department || '—') : (u.studentId || u.department || '—');
+        html += `<tr>
+          <td><b>${u.name}</b></td>
+          <td>${u.email}</td>
+          <td><span class="badge ${badgeClass}">${u.role.toUpperCase()}</span></td>
+          <td>${idInfo}</td>
+          <td><span class="badge ${u.isActive ? 'badge-available' : 'badge-lent'}">${u.isActive ? 'Active' : 'Inactive'}</span></td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('usersTable').innerHTML = users.length ? html : '<div class="empty">No users found</div>';
+    }
+
+    function filterUsers(role) {
+      document.querySelectorAll('.user-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.toLowerCase().includes(role));
+      });
+      if (role === 'all') renderUsersTable(allUsers);
+      else renderUsersTable(allUsers.filter(u => u.role === role));
     }
 
     async function loadAllLogs() {
@@ -691,6 +744,7 @@
 
     loadOverview();
   </script>
+  <script src="js/vnr-ui.js"></script>
 </body>
 
 </html>

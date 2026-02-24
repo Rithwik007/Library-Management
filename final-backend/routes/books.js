@@ -11,13 +11,14 @@ router.get('/', protect, async (req, res) => {
     if (search) {
       query = {
         $or: [
-          { title:  { $regex: search, $options: 'i' } },
+          { title: { $regex: search, $options: 'i' } },
           { author: { $regex: search, $options: 'i' } },
           { bookNumber: { $regex: search, $options: 'i' } }
         ]
       };
     }
-    const books = await Book.find(query).limit(100);
+    const books = await Book.find(query);
+    console.log(`[GET /api/books] Found ${books.length} books`);
     res.json(books);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
