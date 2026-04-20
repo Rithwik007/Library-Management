@@ -27,6 +27,8 @@ app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/logs', require('./routes/logs'));
 app.use('/api/stats', require('./routes/stats'));
 app.use('/api/users', require('./routes/users'));
+app.use("/api/projects", require("./routes/projects"));
+app.use("/api/others", require("./routes/others"));
 
 app.get('/', (req, res) => res.send('Library API is running ✅'));
 

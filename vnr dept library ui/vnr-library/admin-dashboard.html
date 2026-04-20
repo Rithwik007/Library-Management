@@ -427,8 +427,11 @@
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="showTab('overview')"><span>📊</span><span>Overview</span></div>
       <div class="nav-item" onclick="showTab('books')"><span>📚</span><span>Books</span></div>
+      <div class="nav-item" onclick="showTab('projects')"><span>📂</span><span>Projects</span></div>
+      <div class="nav-item" onclick="showTab('others')"><span>📦</span><span>Others</span></div>
       <div class="nav-item" onclick="showTab('users')"><span>👥</span><span>Users</span></div>
       <div class="nav-item" onclick="showTab('logs')"><span>📋</span><span>Activity Logs</span></div>
+      <div class="nav-item" onclick="showTab('payments')"><span>💸</span><span>Payment History</span></div>
     </nav>
     <div class="sidebar-footer">
       <button class="logout-btn" onclick="logout()"><span>🚪</span><span>Sign Out</span></button>
@@ -478,6 +481,20 @@
               <div class="lbl">Today's Logs</div>
             </div>
           </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-green" style="background:rgba(212,172,13,0.1);color:#d4ac0d">📂</div>
+            <div class="stat-info">
+              <div class="num" id="statProjects">—</div>
+              <div class="lbl">Projects</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(46,204,113,0.1);color:#2ecc71">📦</div>
+            <div class="stat-info">
+              <div class="num" id="statOthers">—</div>
+              <div class="lbl">Others (Total)</div>
+            </div>
+          </div>
         </div>
         <div class="card">
           <div class="card-header">
@@ -501,6 +518,30 @@
           </div>
           <div id="booksTable">
             <div class="loading">Loading books...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="tab-content" id="tab-projects">
+        <div class="card">
+          <div class="card-header">
+            <h3>Student Projects Repository</h3>
+          </div>
+          <div id="projectsTableAdmin">
+            <div class="loading">Loading projects...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OTHERS -->
+      <div class="tab-content" id="tab-others">
+        <div class="card">
+          <div class="card-header">
+            <h3>Other Resources Management</h3>
+          </div>
+          <div id="othersTableAdmin">
+            <div class="loading">Loading others...</div>
           </div>
         </div>
       </div>
@@ -530,6 +571,18 @@
           </div>
           <div id="logsTable">
             <div class="loading">Loading logs...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENT HISTORY -->
+      <div class="tab-content" id="tab-payments">
+        <div class="card">
+          <div class="card-header">
+            <h3>Payment History</h3>
+          </div>
+          <div id="paymentsTable">
+            <div class="loading">Loading payment history...</div>
           </div>
         </div>
       </div>
@@ -602,11 +655,15 @@
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       document.getElementById(`tab-${tab}`).classList.add('active');
       event.currentTarget.classList.add('active');
-      const titles = { overview: 'Overview', books: 'Books', users: 'Users', logs: 'Activity Logs' };
+      const titles = { overview: 'Overview', books: 'Books', projects: 'Projects', others: 'Others', users: 'Users', logs: 'Activity Logs', payments: 'Payment History' };
       document.getElementById('pageTitle').textContent = titles[tab];
+      if (tab === 'overview') loadOverview();
       if (tab === 'books') loadBooks();
+      if (tab === 'projects') loadAdminProjects();
+      if (tab === 'others') loadAdminOthers();
       if (tab === 'users') loadUsers();
       if (tab === 'logs') loadAllLogs();
+      if (tab === 'payments') loadPaymentHistory();
     }
 
     async function loadOverview() {
@@ -621,8 +678,10 @@
         document.getElementById('availBooks').textContent = stats.availableBooks;
         document.getElementById('totalLogs').textContent = stats.totalLogs;
         document.getElementById('todayLogs').textContent = stats.todayLogs;
+        if(document.getElementById('statProjects')) document.getElementById('statProjects').textContent = stats.totalProjects || 0;
+        if(document.getElementById('statOthers')) document.getElementById('statOthers').textContent = stats.totalOthers || 0;
 
-        let html = '<table><thead><tr><th>User</th><th>Book</th><th>Type</th><th>Taken</th><th>Due Date</th><th>Returned</th></tr></thead><tbody>';
+        let html = '<table><thead><tr><th>User</th><th>Item / Book</th><th>Type</th><th>Taken</th><th>Due Date</th><th>Returned</th></tr></thead><tbody>';
         transactions.slice(0, 10).forEach(t => {
           const typeBadge = t.type === 'borrow' ? 'badge-faculty' : 'badge-student';
           const dueData = getDueStatus(t.dueDate, t.status);
@@ -738,6 +797,79 @@
         html += '</tbody></table>';
         el.innerHTML = logs.length ? html : '<div class="empty">No logs yet</div>';
       } catch (e) { el.innerHTML = '<div class="empty">Failed to load logs</div>'; }
+    }
+
+    async function loadPaymentHistory() {
+      const el = document.getElementById('paymentsTable');
+      el.innerHTML = '<div class="loading">Loading...</div>';
+      try {
+        const res = await apiFetch('/transactions/fines/all');
+        const fines = await res.json();
+        if (!fines.length) { el.innerHTML = '<div class="empty">No fine payments recorded yet.</div>'; return; }
+        const total = fines.reduce((sum, f) => sum + (f.fineAmount || 0), 0);
+        let html = `<table><thead><tr>
+          <th>User</th><th>Role</th><th>Book</th><th>Borrowed</th><th>Returned</th><th>Fine Paid</th>
+        </tr></thead><tbody>`;
+        fines.forEach(f => {
+          html += `<tr>
+            <td><b>${f.userName}</b></td>
+            <td><span class="badge badge-${f.userRole}">${f.userRole}</span></td>
+            <td>${f.bookTitle}<br><span style="font-size:0.75rem;color:#6b7a99">${f.bookNumber || ''}</span></td>
+            <td style="font-size:0.8rem;white-space:nowrap">${formatDate(f.lentAt)}</td>
+            <td style="font-size:0.8rem;white-space:nowrap;color:#2ed573">${formatDate(f.returnedAt)}</td>
+            <td><span class="badge" style="background:rgba(255,71,87,0.1);color:#ff4757;font-weight:700">₹${f.fineAmount}</span></td>
+          </tr>`;
+        });
+        html += `</tbody></table>
+          <div style="text-align:right;margin-top:1.2rem;font-weight:700;color:#ff4757;font-size:0.95rem;padding:0.5rem 0;border-top:2px solid #f0f4fb">
+            Total Revenue from Fines: <span style="font-size:1.2rem">₹${total}</span>
+          </div>`;
+        el.innerHTML = html;
+      } catch (e) { el.innerHTML = '<div class="empty">Failed to load payment history.</div>'; }
+    }
+
+    async function loadAdminProjects() {
+      const el = document.getElementById('projectsTableAdmin');
+      el.innerHTML = '<div class="loading">Loading projects...</div>';
+      try {
+        const res = await apiFetch('/projects');
+        const projects = await res.json();
+        let html = '<table><thead><tr><th>Year</th><th>Project Title</th><th>Student</th><th>Roll No</th><th>Guide</th></tr></thead><tbody>';
+        projects.forEach(p => {
+          html += `<tr>
+            <td>${p.academic_year || '-'}</td>
+            <td><b>${p.project_title}</b></td>
+            <td>${p.student_name}</td>
+            <td>${p.roll_number}</td>
+            <td>${p.guide_name || '-'}</td>
+          </tr>`;
+        });
+        html += '</tbody></table>';
+        el.innerHTML = projects.length ? html : '<div class="empty">No projects found</div>';
+      } catch (e) { el.innerHTML = '<div class="empty">Error loading projects</div>'; }
+    }
+
+    async function loadAdminOthers() {
+      const el = document.getElementById('othersTableAdmin');
+      el.innerHTML = '<div class="loading">Loading...</div>';
+      try {
+        const res = await apiFetch('/others');
+        const items = await res.json();
+        let html = '<table><thead><tr><th>Item ID</th><th>Title</th><th>Category / Desc</th><th>Year</th><th>Volume</th><th>Total</th><th>Available</th></tr></thead><tbody>';
+        items.forEach(i => {
+          html += `<tr>
+            <td>${i.otherId}</td>
+            <td><b>${i.title}</b></td>
+            <td>${i.description || '-'}</td>
+            <td>${i.year || '-'}</td>
+            <td>${i.volumeNumber || '1'}</td>
+            <td>${i.totalCopies}</td>
+            <td style="color:${i.availableCopies > 0 ? '#2ed573' : '#ff4757'}"><b>${i.availableCopies}</b></td>
+          </tr>`;
+        });
+        html += '</tbody></table>';
+        el.innerHTML = items.length ? html : '<div class="empty">No other items found</div>';
+      } catch (e) { el.innerHTML = '<div class="empty">Error loading others</div>'; }
     }
 
     function logout() { localStorage.clear(); window.location.href = 'login.html'; }

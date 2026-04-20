@@ -408,6 +408,8 @@
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="showTab('books', this)"><span>📚</span><span>Browse Books</span></div>
+      <div class="nav-item" onclick="showTab('projects', this)"><span>📂</span><span>Projects</span></div>
+      <div class="nav-item" onclick="showTab('others', this)"><span>📦</span><span>Others</span></div>
       <div class="nav-item" onclick="showTab('history', this)"><span>📋</span><span>My Reading History</span></div>
     </nav>
     <div class="sidebar-footer">
@@ -418,9 +420,14 @@
   <div class="main">
     <div class="topbar">
       <h1 id="pageTitle">Browse Books</h1>
-      <div style="display:flex;align-items:center;gap:1rem;">
-        <span class="badge-student">STUDENT</span>
-        <span id="topbarName" style="font-size:0.9rem;color:#6b7a99;"></span>
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <div id="projectSearchInfo" style="display:none;font-size:0.85rem;color:var(--vnr-gold);font-weight:600;background:rgba(245,166,35,0.1);padding:4px 12px;border-radius:20px;">
+          Passed out students data
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <span class="badge-student">STUDENT</span>
+          <span id="topbarName" style="font-size:0.9rem;color:#6b7a99;"></span>
+        </div>
       </div>
     </div>
     <div class="content">
@@ -437,6 +444,36 @@
         </div>
         <div class="books-grid" id="booksGrid">
           <div class="loading">Loading books...</div>
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="tab-content" id="tab-projects">
+        <div class="notice-bar" style="background: linear-gradient(135deg, rgba(245,166,35,0.08), rgba(245,166,35,0.05)); border-color: rgba(245,166,35,0.1);">
+          <span>ℹ️</span>
+          <p>Browse through academic projects of passed out students. This is a read-only repository.</p>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="projectSearchInput" placeholder="Search projects by title, student name or roll number..."
+            oninput="filterProjects()" />
+        </div>
+        <div class="books-grid" id="projectsGrid">
+          <div class="loading">Loading projects...</div>
+        </div>
+      </div>
+
+      <!-- OTHERS -->
+      <div class="tab-content" id="tab-others">
+        <div class="notice-bar" style="background: linear-gradient(135deg, rgba(46, 213, 115, 0.08), rgba(46, 213, 115, 0.05)); border-color: rgba(46, 213, 115, 0.1);">
+          <span>ℹ️</span>
+          <p>Browse through secondary resources. You can read these items at the library.</p>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="otherSearchInput" placeholder="Search others by title, description or ID..."
+            oninput="filterOthers()" />
+        </div>
+        <div class="books-grid" id="othersGrid">
+          <div class="loading">Loading...</div>
         </div>
       </div>
 
@@ -483,8 +520,21 @@
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       document.getElementById(`tab-${tab}`).classList.add('active');
       el.classList.add('active');
-      document.getElementById('pageTitle').textContent = tab === 'books' ? 'Browse Books' : 'My Reading History';
+      
+      const titles = {
+        'books': 'Browse Books',
+        'projects': 'Academic Projects',
+        'others': 'Other Resources',
+        'history': 'My Reading History'
+      };
+      document.getElementById('pageTitle').textContent = titles[tab];
+      document.getElementById('projectSearchInfo').style.display = (tab === 'projects' || tab === 'others') ? 'block' : 'none';
+      if (tab === 'projects') document.getElementById('projectSearchInfo').textContent = 'Passed out students data';
+      if (tab === 'others') document.getElementById('projectSearchInfo').textContent = 'Secondary library resources';
+
       if (tab === 'history') loadHistory();
+      if (tab === 'projects') loadProjects();
+      if (tab === 'others') loadOthers();
     }
 
     let allBooks = [];
@@ -521,6 +571,95 @@
         b.author?.toLowerCase().includes(q) ||
         b.bookNumber?.toLowerCase().includes(q)
       ));
+    }
+
+    let allProjects = [];
+    async function loadProjects() {
+      try {
+        const grid = document.getElementById('projectsGrid');
+        grid.innerHTML = '<div class="loading">Loading projects...</div>';
+        const res = await apiFetch('/projects');
+        allProjects = await res.json();
+        renderProjects(allProjects);
+      } catch (e) { document.getElementById('projectsGrid').innerHTML = '<div class="empty">Failed to load projects</div>'; }
+    }
+
+    function renderProjects(projects) {
+      const grid = document.getElementById('projectsGrid');
+      if (!projects.length) { grid.innerHTML = '<div class="empty">No projects found</div>'; return; }
+      grid.innerHTML = projects.map(p => `
+    <div class="book-card" style="border-left: 4px solid var(--vnr-gold);">
+      <div class="book-num">${p.academic_year || 'N/A'}</div>
+      <div class="book-title">${p.project_title}</div>
+      <div class="book-author">${p.student_name} (${p.roll_number})</div>
+      <div class="book-meta">
+        <span class="meta-tag">👨‍🏫 Guide: ${p.guide_name || 'N/A'}</span>
+      </div>
+      <div style="font-size: 0.75rem; color: #6b7a99; margin-top: 10px; font-style: italic;">
+        Read-only access
+      </div>
+    </div>`).join('');
+    }
+
+    function filterProjects() {
+      const q = document.getElementById('projectSearchInput').value.toLowerCase();
+      renderProjects(allProjects.filter(p =>
+        p.project_title?.toLowerCase().includes(q) ||
+        p.student_name?.toLowerCase().includes(q) ||
+        p.roll_number?.toLowerCase().includes(q) ||
+        p.guide_name?.toLowerCase().includes(q)
+      ));
+    }
+
+    let allOthers = [];
+    async function loadOthers() {
+      try {
+        const grid = document.getElementById('othersGrid');
+        grid.innerHTML = '<div class="loading">Loading...</div>';
+        const res = await apiFetch('/others');
+        allOthers = await res.json();
+        renderOthers(allOthers);
+      } catch (e) { document.getElementById('othersGrid').innerHTML = '<div class="empty">Failed to load items</div>'; }
+    }
+
+    function renderOthers(items) {
+      const grid = document.getElementById('othersGrid');
+      if (!items.length) { grid.innerHTML = '<div class="empty">No items found</div>'; return; }
+      grid.innerHTML = items.map(p => `
+    <div class="book-card" style="border-left: 4px solid #2ed573;">
+      <div class="book-num">${p.otherId} / ${p.year || 'N/A'}</div>
+      <div class="book-title">${p.title}</div>
+      <div class="book-author">${p.description || ''} (Vol: ${p.volumeNumber || '1'})</div>
+      <div class="book-meta">
+        <span class="meta-tag">📚 ${p.totalCopies} copies</span>
+        <span class="meta-tag ${p.availableCopies > 0 ? 'meta-avail' : ''}">
+          ${p.availableCopies > 0 ? '✓ ' + p.availableCopies + ' Available' : 'All copies out'}
+        </span>
+      </div>
+      <button class="btn-read" 
+              ${p.availableCopies > 0 ? '' : 'disabled style="background:#ccc;cursor:not-allowed;"'}
+              onclick="readOther('${p._id}','${p.title.replace(/'/g, "\\'")}')">📖 Stay & Read</button>
+    </div>`).join('');
+    }
+
+    function filterOthers() {
+      const q = document.getElementById('otherSearchInput').value.toLowerCase();
+      renderOthers(allOthers.filter(p =>
+        p.title?.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
+        p.otherId?.toLowerCase().includes(q) ||
+        p.copyNumber?.toLowerCase().includes(q)
+      ));
+    }
+
+    async function readOther(otherId, title) {
+      try {
+        const res = await apiFetch('/transactions/reading-other', { method: 'POST', body: JSON.stringify({ otherId }) });
+        const data = await res.json();
+        if (!res.ok) { await VnrUI.showError(data.message); return; }
+        await VnrUI.showSuccess(`Reading session logged for "${title}"`);
+        loadOthers();
+      } catch (e) { await VnrUI.showError('Error logging session.'); }
     }
 
     async function readBook(bookId, title) {

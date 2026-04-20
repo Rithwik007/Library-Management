@@ -19,6 +19,7 @@ const transactionSchema = new mongoose.Schema({
   userName: { type: String },
   userRole: { type: String },
   bookId: { type: mongoose.Schema.Types.ObjectId, ref: 'Book' },
+  otherId: { type: mongoose.Schema.Types.ObjectId, ref: 'Other' },
   bookTitle: { type: String },
   bookNumber: { type: String },
   type: { type: String, enum: ['borrow', 'return', 'reading'], required: true },
@@ -26,6 +27,8 @@ const transactionSchema = new mongoose.Schema({
   dueDate: { type: String },
   returnedAt: { type: String },
   status: { type: String, enum: ['active', 'returned', 'reading'], default: 'active' },
+  fineAmount: { type: Number, default: 0 },
+  finePaid: { type: Boolean, default: false },
   createdAt: { type: String, default: getISTString },
   updatedAt: { type: String, default: getISTString }
 });

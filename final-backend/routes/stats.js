@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
+const Project = require('../models/Project');
+const Other = require('../models/Other');
 const Transaction = require('../models/Transaction');
 const ActivityLog = require('../models/ActivityLog');
 const { protect, authorizeRoles } = require('../middleware/auth');
@@ -13,6 +15,11 @@ router.get('/', protect, authorizeRoles('admin'), async (req, res) => {
             { $group: { _id: null, total: { $sum: "$availableCopies" } } }
         ]);
         const totalLogs = await Transaction.countDocuments();
+        const totalProjects = await Project.countDocuments();
+        const totalOthers = await Other.countDocuments();
+        const availOthers = await Other.aggregate([
+            { $group: { _id: null, total: { $sum: "$availableCopies" } } }
+        ]);
 
         // Get today's date string in en-GB format as used in models (e.g., "24 Feb 2026")
         const options = {
@@ -33,6 +40,9 @@ router.get('/', protect, authorizeRoles('admin'), async (req, res) => {
         res.json({
             totalBooks,
             availableBooks: availBooks.length > 0 ? availBooks[0].total : 0,
+            totalProjects,
+            totalOthers,
+            availableOthers: availOthers.length > 0 ? availOthers[0].total : 0,
             totalLogs,
             todayLogs: todayLogsCount
         });
