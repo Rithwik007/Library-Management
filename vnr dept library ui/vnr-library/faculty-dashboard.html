@@ -401,6 +401,34 @@
       background: #1e9e52;
     }
 
+    .btn-pay-fine {
+      background: #ff4757;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn-pay-fine:hover {
+      background: #c0392b;
+    }
+
+    .fine-badge {
+      display: inline-block;
+      background: rgba(255, 71, 87, 0.1);
+      color: #ff4757;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
     .log-info .log-book {
       font-weight: 600;
       font-size: 0.9rem;
@@ -438,6 +466,71 @@
       color: #ff4757 !important;
       font-weight: 700;
     }
+
+    .sub-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      background: #f0f4fb;
+      padding: 4px;
+      border-radius: 10px;
+      width: fit-content;
+    }
+
+    .sub-tab-btn {
+      padding: 7px 18px;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #6b7a99;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .sub-tab-btn.active {
+      background: #fff;
+      color: var(--vnr-blue);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .fine-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .fine-table th {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #6b7a99;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border-bottom: 2px solid #f0f4fb;
+    }
+
+    .fine-table td {
+      padding: 12px;
+      font-size: 0.88rem;
+      color: var(--vnr-dark);
+      border-bottom: 1px solid #f5f7fc;
+    }
+
+    .fine-table tr:hover td {
+      background: #f8faff;
+    }
+
+    .amount-badge {
+      background: rgba(255, 71, 87, 0.1);
+      color: #ff4757;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
   </style>
 </head>
 
@@ -454,6 +547,8 @@
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="showTab('books', this)"><span>📚</span><span>Browse Books</span></div>
+      <div class="nav-item" onclick="showTab('projects', this)"><span>📂</span><span>Browse Projects</span></div>
+      <div class="nav-item" onclick="showTab('others', this)"><span>📦</span><span>Browse Others</span></div>
       <div class="nav-item" onclick="showTab('history', this)"><span>📋</span><span>My History</span></div>
     </nav>
     <div class="sidebar-footer">
@@ -464,9 +559,14 @@
   <div class="main">
     <div class="topbar">
       <h1 id="pageTitle">Browse Books</h1>
-      <div style="display:flex;align-items:center;gap:1rem;">
-        <span class="badge-faculty">FACULTY</span>
-        <span id="topbarName" style="font-size:0.9rem;color:#6b7a99;"></span>
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <div id="projectSearchInfo" style="display:none;font-size:0.85rem;color:var(--vnr-gold);font-weight:600;background:rgba(245,166,35,0.1);padding:4px 12px;border-radius:20px;">
+          Student Projects History
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <span class="badge-faculty">FACULTY</span>
+          <span id="topbarName" style="font-size:0.9rem;color:#6b7a99;"></span>
+        </div>
       </div>
     </div>
     <div class="content">
@@ -482,12 +582,56 @@
         </div>
       </div>
 
+      <!-- PROJECTS -->
+      <div class="tab-content" id="tab-projects">
+        <div class="notice-bar" style="background: linear-gradient(135deg, rgba(26, 58, 107, 0.05), rgba(46, 213, 115, 0.05)); border: 1px solid rgba(46, 213, 115, 0.1); border-radius: 12px; padding: 1rem 1.4rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+          <span>📂</span>
+          <p style="font-size: 0.85rem; color: var(--vnr-blue); font-weight: 500;">Research repository: Browse through academic projects of passed out students.</p>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="projectSearchInput" placeholder="Search projects by title, student name or roll number..."
+            oninput="filterProjects()" />
+        </div>
+        <div class="books-grid" id="projectsGrid">
+          <div class="loading">Loading projects...</div>
+        </div>
+      </div>
+
+      <!-- OTHERS -->
+      <div class="tab-content" id="tab-others">
+        <div class="notice-bar" style="background: linear-gradient(135deg, rgba(26, 58, 107, 0.05), rgba(46, 213, 115, 0.05)); border: 1px solid rgba(46, 213, 115, 0.1); border-radius: 12px; padding: 1rem 1.4rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+          <span>📦</span>
+          <p style="font-size: 0.85rem; color: var(--vnr-blue); font-weight: 500;">Secondary resources: Browse, read, or borrow items from the 'Others' collection.</p>
+        </div>
+        <div class="search-bar">
+          <input type="text" id="otherSearchInput" placeholder="Search others by title, description or ID..."
+            oninput="filterOthers()" />
+        </div>
+        <div class="books-grid" id="othersGrid">
+          <div class="loading">Loading others...</div>
+        </div>
+      </div>
+
       <!-- HISTORY -->
       <div class="tab-content" id="tab-history">
-        <div class="card">
-          <h3>My Activity History</h3>
-          <div id="historyList">
-            <div class="loading">Loading...</div>
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" id="subTabActivity" onclick="showSubTab('activity')">📋 Activity History</button>
+          <button class="sub-tab-btn" id="subTabFine" onclick="showSubTab('fine')">💸 Fine History</button>
+        </div>
+
+        <!-- Activity History -->
+        <div id="subTab-activity">
+          <div class="card">
+            <h3>My Activity History</h3>
+            <div id="historyList"><div class="loading">Loading...</div></div>
+          </div>
+        </div>
+
+        <!-- Fine History -->
+        <div id="subTab-fine" style="display:none">
+          <div class="card">
+            <h3>My Fine History</h3>
+            <div id="fineHistoryList"><div class="loading">Loading...</div></div>
           </div>
         </div>
       </div>
@@ -547,9 +691,23 @@
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       document.getElementById(`tab-${tab}`).classList.add('active');
       el.classList.add('active');
-      const titles = { books: 'Browse Books', history: 'My History' };
+      const titles = { books: 'Browse Books', projects: 'Student Projects', others: 'Other Resources', history: 'My History' };
       document.getElementById('pageTitle').textContent = titles[tab];
-      if (tab === 'history') loadHistory();
+      document.getElementById('projectSearchInfo').style.display = (tab === 'projects' || tab === 'others') ? 'block' : 'none';
+      if (tab === 'projects') document.getElementById('projectSearchInfo').textContent = 'Student Projects History';
+      if (tab === 'others') document.getElementById('projectSearchInfo').textContent = 'Secondary repository items';
+      
+      if (tab === 'history') { loadHistory(); showSubTab('activity'); }
+      if (tab === 'projects') loadProjects();
+      if (tab === 'others') loadOthers();
+    }
+
+    function showSubTab(sub) {
+      ['activity', 'fine'].forEach(s => {
+        document.getElementById(`subTab-${s}`).style.display = s === sub ? 'block' : 'none';
+        document.getElementById(`subTab${s.charAt(0).toUpperCase() + s.slice(1)}`).classList.toggle('active', s === sub);
+      });
+      if (sub === 'fine') loadFineHistory();
     }
 
     let allBooks = [];
@@ -593,6 +751,111 @@
       ));
     }
 
+    let allProjects = [];
+    async function loadProjects() {
+      try {
+        const grid = document.getElementById('projectsGrid');
+        grid.innerHTML = '<div class="loading">Loading projects...</div>';
+        const res = await apiFetch('/projects');
+        allProjects = await res.json();
+        renderProjects(allProjects);
+      } catch (e) { document.getElementById('projectsGrid').innerHTML = '<div class="empty">Failed to load projects</div>'; }
+    }
+
+    function renderProjects(projects) {
+      const grid = document.getElementById('projectsGrid');
+      if (!projects.length) { grid.innerHTML = '<div class="empty">No projects found</div>'; return; }
+      grid.innerHTML = projects.map(p => `
+    <div class="book-card" style="border-left: 4px solid var(--vnr-blue);">
+      <div class="book-num">${p.academic_year || 'N/A'}</div>
+      <div class="book-title">${p.project_title}</div>
+      <div class="book-author">${p.student_name} (${p.roll_number})</div>
+      <div class="book-meta">
+        <span class="meta-tag">👨‍🏫 Guide: ${p.guide_name || 'N/A'}</span>
+      </div>
+      <div style="font-size: 0.75rem; color: #6b7a99; margin-top: 10px; font-style: italic;">
+        Reference only
+      </div>
+    </div>`).join('');
+    }
+
+    function filterProjects() {
+      const q = document.getElementById('projectSearchInput').value.toLowerCase();
+      renderProjects(allProjects.filter(p =>
+        p.project_title?.toLowerCase().includes(q) ||
+        p.student_name?.toLowerCase().includes(q) ||
+        p.roll_number?.toLowerCase().includes(q) ||
+        p.guide_name?.toLowerCase().includes(q)
+      ));
+    }
+
+    let allOthers = [];
+    async function loadOthers() {
+      try {
+        const grid = document.getElementById('othersGrid');
+        grid.innerHTML = '<div class="loading">Loading others...</div>';
+        const res = await apiFetch('/others');
+        allOthers = await res.json();
+        renderOthers(allOthers);
+      } catch (e) { document.getElementById('othersGrid').innerHTML = '<div class="empty">Failed to load items</div>'; }
+    }
+
+    function renderOthers(items) {
+      const grid = document.getElementById('othersGrid');
+      if (!items.length) { grid.innerHTML = '<div class="empty">No items found</div>'; return; }
+      grid.innerHTML = items.map(p => `
+    <div class="book-card" style="border-left: 4px solid var(--vnr-blue);">
+      <div class="book-num">${p.otherId} / ${p.year || 'N/A'}</div>
+      <div class="book-title">${p.title}</div>
+      <div class="book-author">${p.description || ''} (Vol: ${p.volumeNumber || '1'})</div>
+      <div class="book-meta">
+        <span class="meta-tag">📚 Total: ${p.totalCopies}</span>
+        <span class="meta-tag ${p.availableCopies > 0 ? 'meta-avail' : 'meta-unavail'}">
+          ${p.availableCopies > 0 ? '✓ ' + p.availableCopies + ' Available' : '✗ Unavailable'}
+        </span>
+      </div>
+      <div class="book-btns">
+        <button class="btn-read" 
+                ${p.availableCopies > 0 ? '' : 'disabled style="background:#eee;color:#bbb;cursor:not-allowed;"'}
+                onclick="readOther('${p._id}','${p.title.replace(/'/g, "\\'")}')">📖 Stay & Read</button>
+        ${p.availableCopies > 0
+          ? `<button class="btn-borrow" onclick="borrowOther('${p._id}','${p.title.replace(/'/g, "\\'")}')">📦 Take Item</button>`
+          : `<button class="btn-disabled">Not Available</button>`}
+      </div>
+    </div>`).join('');
+    }
+
+    function filterOthers() {
+      const q = document.getElementById('otherSearchInput').value.toLowerCase();
+      renderOthers(allOthers.filter(p =>
+        p.title?.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
+        p.otherId?.toLowerCase().includes(q) ||
+        p.copyNumber?.toLowerCase().includes(q)
+      ));
+    }
+
+    async function borrowOther(otherId, title) {
+      if (!(await VnrUI.showConfirm(`Borrow "${title}"?\nDue date will be 14 days from today.`, "Confirm Borrowing"))) return;
+      try {
+        const res = await apiFetch('/transactions/borrow-other', { method: 'POST', body: JSON.stringify({ otherId }) });
+        const data = await res.json();
+        if (!res.ok) { await VnrUI.showError(data.message); return; }
+        await VnrUI.showSuccess(`Successfully borrowed!\nDue: ${formatDate(data.dueDate)}`);
+        loadOthers();
+      } catch (e) { await VnrUI.showError('Error borrowing item.'); }
+    }
+
+    async function readOther(otherId, title) {
+      try {
+        const res = await apiFetch('/transactions/reading-other', { method: 'POST', body: JSON.stringify({ otherId }) });
+        const data = await res.json();
+        if (!res.ok) { await VnrUI.showError(data.message); return; }
+        await VnrUI.showSuccess(`Reading session logged for "${title}"`);
+        loadOthers();
+      } catch (e) { await VnrUI.showError('Error logging session.'); }
+    }
+
     async function borrowBook(bookId, title) {
       if (!(await VnrUI.showConfirm(`Borrow "${title}"?\nDue date will be 14 days from today.`, "Confirm Borrowing"))) return;
       try {
@@ -613,6 +876,18 @@
       } catch (e) { await VnrUI.showError('Error logging session.'); }
     }
 
+    function calcFine(dueDateStr) {
+      if (!dueDateStr || dueDateStr === '-') return 0;
+      try {
+        const due = new Date(dueDateStr.replace(',', ''));
+        const now = new Date();
+        const diffMs = now - due;
+        if (diffMs <= 0) return 0;
+        const overdueDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        return 10 + (overdueDays * 5);
+      } catch (e) { return 0; }
+    }
+
     async function loadHistory() {
       try {
         const res = await apiFetch('/transactions/my');
@@ -624,19 +899,73 @@
           const cls = l.type === 'borrow' ? 'log-borrow' : l.status === 'returned' ? 'log-return' : 'log-read';
           const statusColor = l.status === 'reading' ? '#f5a623' : l.status === 'active' ? '#1a3a6b' : '#2ed573';
           const dueData = getDueStatus(l.dueDate, l.status);
+          const fine = (l.type === 'borrow' && l.status === 'active') ? calcFine(l.dueDate) : 0;
+          const isOverdue = fine > 0;
+
+          let actionBtn = '';
+          if (l.status === 'reading' || (l.status === 'active' && !isOverdue)) {
+            actionBtn = `<button class="btn-return" onclick="returnBook('${l._id}')">Return Book</button>`;
+          } else if (l.status === 'active' && isOverdue) {
+            actionBtn = `
+              <div class="fine-badge">⚠️ Fine: ₹${fine} (₹10 base + ₹5/day overdue)</div>
+              <button class="btn-pay-fine" onclick="payFine('${l._id}', ${fine})">💸 Pay Fine & Return</button>`;
+          } else if (l.status === 'returned' && l.finePaid) {
+            actionBtn = `<div style="font-size:0.78rem;color:#2ed573;margin-top:4px;">✅ Fine paid: ₹${l.fineAmount}</div>`;
+          }
 
           return `<div class="log-item">
         <div class="log-icon ${cls}">${icon}</div>
         <div class="log-info" style="flex:1">
           <div class="log-book">${l.bookTitle}</div>
-          <div class="log-time">${formatDate(l.createdAt)} — Status: <strong style="color:${statusColor}">${l.status.toUpperCase()}</strong></div>
-          ${dueData ? `<div class="log-time ${dueData.isUrgent ? 'text-danger' : ''}">Due: ${dueData.text}</div>` : ''}
-          ${(l.status === 'reading' || l.status === 'active') ? `<button class="btn-return" onclick="returnBook('${l._id}')">Return Book</button>` : ''}
+          <div class="log-time">${formatDate(l.createdAt)} — Status: <strong style="color:${isOverdue ? '#ff4757' : statusColor}">${isOverdue ? 'OVERDUE' : l.status.toUpperCase()}</strong></div>
+          ${dueData ? `<div class="log-time ${dueData.isUrgent || isOverdue ? 'text-danger' : ''}">Due: ${dueData.text}</div>` : ''}
+          ${actionBtn}
         </div>
         <span class="log-badge" style="background:rgba(26,58,107,0.1);color:var(--vnr-blue)">${l.type.toUpperCase()}</span>
       </div>`;
         }).join('');
       } catch (e) { console.error(e); }
+    }
+
+    async function payFine(trId, fineAmount) {
+      if (!(await VnrUI.showConfirm(`Pay ₹${fineAmount} fine and return this book?`, 'Confirm Fine Payment'))) return;
+      try {
+        const res = await apiFetch('/transactions/pay-fine', { method: 'POST', body: JSON.stringify({ transactionId: trId }) });
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch { data = { message: text }; }
+        if (!res.ok) { await VnrUI.showError(data.message || `Server error (${res.status})`); return; }
+        await VnrUI.showSuccess(`✅ Fine of ₹${data.fineAmount} paid. Book returned successfully!`);
+        loadHistory();
+        loadBooks();
+      } catch (e) { console.error('payFine error:', e); await VnrUI.showError('Network error: Could not reach the server. Is it running?'); }
+    }
+
+    async function loadFineHistory() {
+      const el = document.getElementById('fineHistoryList');
+      el.innerHTML = '<div class="loading">Loading...</div>';
+      try {
+        const res = await apiFetch('/transactions/fines/my');
+        const fines = await res.json();
+        if (!fines.length) { el.innerHTML = '<div class="empty">No fines paid yet.</div>'; return; }
+        let total = fines.reduce((sum, f) => sum + (f.fineAmount || 0), 0);
+        let html = `<table class="fine-table"><thead><tr>
+          <th>Book</th><th>Borrowed</th><th>Returned</th><th>Fine Paid</th>
+        </tr></thead><tbody>`;
+        fines.forEach(f => {
+          html += `<tr>
+            <td><b>${f.bookTitle}</b><br><span style="font-size:0.75rem;color:#6b7a99">${f.bookNumber || ''}</span></td>
+            <td style="font-size:0.82rem;white-space:nowrap">${formatDate(f.lentAt)}</td>
+            <td style="font-size:0.82rem;white-space:nowrap;color:#2ed573">${formatDate(f.returnedAt)}</td>
+            <td><span class="amount-badge">₹${f.fineAmount}</span></td>
+          </tr>`;
+        });
+        html += `</tbody></table>
+          <div style="text-align:right;margin-top:1rem;font-weight:700;color:#ff4757;font-size:0.95rem">
+            Total Fines Paid: <span style="font-size:1.1rem">₹${total}</span>
+          </div>`;
+        el.innerHTML = html;
+      } catch (e) { el.innerHTML = '<div class="empty">Failed to load fine history.</div>'; }
     }
 
     async function returnBook(trId) {
