@@ -56,4 +56,15 @@ router.get('/search', protect, async (req, res) => {
   }
 });
 
+// GET /api/knowledge/my/all
+router.get('/my/all', protect, async (req, res) => {
+  try {
+    const knowledge = await BookKnowledge.find({ student_id: req.user.id })
+      .populate('book_id', 'title');
+    res.json(knowledge);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 module.exports = router;
