@@ -440,6 +440,32 @@
     .topic-form { margin-top: 10px; display: flex; gap: 8px; }
     .topic-form input { flex: 1; padding: 6px 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.8rem; }
     .topic-btn { background: #1565c0; color: #fff; border: none; border-radius: 6px; padding: 0 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+
+    /* Appointment Styles */
+    .apt-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 1rem;
+      background: #fcfdfe;
+      border: 1px solid #edf2fc;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+    .apt-icon {
+      width: 45px; height: 45px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .apt-info { flex: 1; }
+    .apt-info b { display: block; font-size: 0.95rem; color: var(--vnr-dark); }
+    .apt-info span { font-size: 0.8rem; color: #6b7a99; }
+    .status-badge {
+      font-size: 0.7rem; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase;
+    }
+    .status-pending { background: rgba(245, 166, 35, 0.1); color: #f5a623; }
+    .status-confirmed { background: rgba(46, 213, 115, 0.1); color: #2ed573; }
+    .status-done { background: rgba(26, 58, 107, 0.1); color: var(--vnr-blue); }
   </style>
 </head>
 
@@ -459,6 +485,7 @@
       <div class="nav-item" onclick="showTab('projects', this)"><span>📂</span><span>Projects</span></div>
       <div class="nav-item" onclick="showTab('others', this)"><span>📦</span><span>Others</span></div>
       <div class="nav-item" onclick="showTab('history', this)"><span>📋</span><span>My Reading History</span></div>
+      <div class="nav-item" onclick="showTab('appointments', this)"><span>📅</span><span>My Appointments</span></div>
     </nav>
     <div class="sidebar-footer">
       <button class="logout-btn" onclick="logout()"><span>🚪</span><span>Sign Out</span></button>
@@ -492,7 +519,6 @@
             <span class="badge-student">STUDENT</span>
             <span id="topbarName" style="font-size:0.9rem;color:#6b7a99;"></span>
           </div>
-        </div>
       </div>
     </div>
     <div class="content">
@@ -547,6 +573,25 @@
         <div class="card">
           <h3>My Reading History</h3>
           <div id="historyList">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- APPOINTMENTS -->
+      <div class="tab-content" id="tab-appointments">
+        <div class="card">
+          <h3>Requested Study Sessions</h3>
+          <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Sessions you've requested from peer experts.</p>
+          <div id="myRequestsList">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+          <h3>Incoming Expert Requests</h3>
+          <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Students wanting your help with books you've understood.</p>
+          <div id="expertRequestsList">
             <div class="loading">Loading...</div>
           </div>
         </div>
@@ -665,6 +710,7 @@
       if (tab === 'history') loadHistory();
       if (tab === 'projects') loadProjects();
       if (tab === 'others') loadOthers();
+      if (tab === 'appointments') loadAppointments();
     }
 
     let allBooks = [];
@@ -955,6 +1001,53 @@
         await VnrUI.showSuccess('Knowledge shared! You are now an expert for this book.');
         document.getElementById(`topic-${bookId}`).value = '';
       } catch (e) { await VnrUI.showError('Failed to share knowledge.'); }
+    }
+
+    async function loadAppointments() {
+      try {
+        const res = await apiFetch(`/appointments/${user.id}`);
+        const data = await res.json();
+        
+        const myRequests = data.filter(a => a.requester_id._id === user.id);
+        const expertRequests = data.filter(a => a.expert_id._id === user.id);
+        
+        const renderList = (list, elId, isExpert) => {
+          const el = document.getElementById(elId);
+          if (!list.length) { el.innerHTML = `<div class="empty">No ${elId.includes('my') ? 'requests' : 'incoming calls'} yet</div>`; return; }
+          
+          el.innerHTML = list.map(a => `
+            <div class="apt-card">
+              <div class="apt-icon">${isExpert ? '🎓' : '📅'}</div>
+              <div class="apt-info">
+                <b>${a.book_id.title}</b>
+                <span>${isExpert ? 'Learner: ' + a.requester_id.name : 'Expert: ' + a.expert_id.name}</span>
+                <span style="display:block; margin-top:2px;">🕒 ${new Date(a.slot_datetime).toLocaleString()}</span>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                <span class="status-badge status-${a.status}">${a.status}</span>
+                ${isExpert && a.status === 'pending' ? `
+                  <button class="btn-action-small" style="background:var(--vnr-blue); color:#fff; border:none;" onclick="updateAptStatus('${a._id}', 'confirmed')">Accept Request</button>
+                ` : ''}
+              </div>
+            </div>
+          `).join('');
+        };
+        
+        renderList(myRequests, 'myRequestsList', false);
+        renderList(expertRequests, 'expertRequestsList', true);
+      } catch (e) { console.error(e); }
+    }
+
+    async function updateAptStatus(id, status) {
+      try {
+        const res = await apiFetch(`/appointments/${id}/status`, {
+          method: 'PATCH',
+          body: JSON.stringify({ status })
+        });
+        if (!res.ok) { const d = await res.json(); await VnrUI.showError(d.message); return; }
+        await VnrUI.showSuccess(`Appointment updated to ${status}!`);
+        loadAppointments();
+      } catch (e) { await VnrUI.showError('Failed to update appointment.'); }
     }
 
     function logout() { localStorage.clear(); window.location.href = 'login.html'; }

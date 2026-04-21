@@ -55,4 +55,36 @@ router.get('/:user_id', protect, async (req, res) => {
   }
 });
 
+// PATCH /api/appointments/:id/status
+router.patch('/:id/status', protect, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const appointment = await Appointment.findById(req.params.id)
+      .populate('book_id', 'title')
+      .populate('expert_id', 'name');
+
+    if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
+
+    // Only the expert can confirm/accept
+    if (appointment.expert_id._id.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Only the expert can update status' });
+    }
+
+    appointment.status = status;
+    await appointment.save();
+
+    // Notify the requester
+    if (status === 'confirmed') {
+      await Notification.create({
+        user_id: appointment.requester_id,
+        message: `Expert ${req.user.name} accepted your appointment for "${appointment.book_id.title}". Check "My Appointments" for details.`
+      });
+    }
+
+    res.json({ message: `Appointment ${status}`, appointment });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 module.exports = router;
