@@ -29,6 +29,10 @@ app.use('/api/stats', require('./routes/stats'));
 app.use('/api/users', require('./routes/users'));
 app.use("/api/projects", require("./routes/projects"));
 app.use("/api/others", require("./routes/others"));
+app.use("/api/knowledge", require("./routes/knowledge"));
+app.use("/api/appointments", require("./routes/appointments"));
+app.use("/api/notifications", require("./routes/notifications"));
+app.use("/api/ratings", require("./routes/ratings"));
 
 app.get('/', (req, res) => res.send('Library API is running ✅'));
 
