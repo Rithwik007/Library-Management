@@ -56,7 +56,7 @@ router.post('/borrow', protect, authorizeRoles('faculty', 'admin'), async (req, 
       userRole: req.user.role,
       action: 'BORROWED',
       bookTitle: book.title,
-      details: `Due: ${dueDate.toDateString()}`
+      details: `Due: ${dueDate}`
     });
 
     res.json({ message: 'Book borrowed successfully', transaction, dueDate });
@@ -107,9 +107,15 @@ router.post('/reading', protect, async (req, res) => {
 router.post('/borrow-other', protect, authorizeRoles('faculty', 'admin'), async (req, res) => {
   try {
     const { otherId } = req.body;
-    const item = await Other.findById(otherId);
+    let item = await Other.findById(otherId);
     if (!item) return res.status(404).json({ message: 'Item not found' });
-    if (item.availableCopies < 1)
+
+    // If specific item is out, look for any available item in the same logical group
+    if (item.availableCopies < 1) {
+      item = await Other.findOne({ otherId: item.otherId, availableCopies: { $gt: 0 } });
+    }
+
+    if (!item)
       return res.status(400).json({ message: `No copies available` });
 
     const due = new Date();
@@ -128,7 +134,7 @@ router.post('/borrow-other', protect, authorizeRoles('faculty', 'admin'), async 
       status: 'active'
     });
 
-    await Other.findByIdAndUpdate(otherId, { $inc: { availableCopies: -1 } });
+    await Other.findByIdAndUpdate(item._id, { $inc: { availableCopies: -1 } });
 
     await ActivityLog.create({
       userId: req.user.id,
@@ -149,9 +155,15 @@ router.post('/borrow-other', protect, authorizeRoles('faculty', 'admin'), async 
 router.post('/reading-other', protect, async (req, res) => {
   try {
     const { otherId } = req.body;
-    const item = await Other.findById(otherId);
+    let item = await Other.findById(otherId);
     if (!item) return res.status(404).json({ message: 'Item not found' });
-    if (item.availableCopies < 1)
+
+    // If specific item is out, look for any available item in the same logical group
+    if (item.availableCopies < 1) {
+      item = await Other.findOne({ otherId: item.otherId, availableCopies: { $gt: 0 } });
+    }
+
+    if (!item)
       return res.status(400).json({ message: 'No copies available for reading' });
 
     const transaction = await Transaction.create({
@@ -165,7 +177,7 @@ router.post('/reading-other', protect, async (req, res) => {
       status: 'reading'
     });
 
-    await Other.findByIdAndUpdate(otherId, { $inc: { availableCopies: -1 } });
+    await Other.findByIdAndUpdate(item._id, { $inc: { availableCopies: -1 } });
 
     await ActivityLog.create({
       userId: req.user.id,

@@ -348,50 +348,98 @@
       margin-bottom: 1.2rem;
     }
 
-    .log-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid #f5f7fc;
+    /* Notifications & Features */
+    .notif-container { position: relative; cursor: pointer; }
+    .notif-badge { 
+      position: absolute; top: -5px; right: -8px; 
+      background: #ff4757; color: #fff; font-size: 0.65rem; 
+      padding: 2px 6px; border-radius: 10px; font-weight: 800;
+      display: none;
+    }
+    .notif-dropdown {
+      position: absolute; top: 100%; right: 0; width: 320px;
+      background: #fff; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+      border: 1px solid #edf2fc; z-index: 100; margin-top: 15px;
+      display: none; flex-direction: column; overflow: hidden;
+    }
+    .notif-header { 
+      padding: 12px 16px; border-bottom: 1px solid #f0f4fb; 
+      display: flex; justify-content: space-between; align-items: center;
+      background: #fcfdfe;
+    }
+    .notif-header h4 { font-size: 0.85rem; font-weight: 700; color: var(--vnr-dark); }
+    .notif-list { max-height: 380px; overflow-y: auto; }
+    .notif-item { 
+      padding: 12px 16px; border-bottom: 1px solid #f8f9fd; 
+      transition: background 0.2s; position: relative;
+    }
+    .notif-item:hover { background: #fcfdfe; }
+    .notif-item.unread { background: #f0f7ff; }
+    .notif-item p { font-size: 0.82rem; color: #4a5568; line-height: 1.4; }
+    .notif-item span { font-size: 0.7rem; color: #a0aec0; display: block; margin-top: 4px; }
+    .notif-item .mark-btn { 
+      position: absolute; top: 10px; right: 10px; font-size: 0.7rem; 
+      color: #1565c0; cursor: pointer; font-weight: 600;
     }
 
-    .log-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(100, 181, 246, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
+    /* Rating System */
+    .rating-stars { display: flex; gap: 4px; color: #cbd5e0; font-size: 1.1rem; }
+    .rating-stars span { cursor: pointer; transition: color 0.1s; }
+    .rating-stars span.active { color: #f5a623; }
+    .rating-avg { font-size: 0.85rem; font-weight: 700; color: #4a5568; display: flex; align-items: center; gap: 4px; }
+    .star-gold { color: #f5a623; }
+
+    /* Peer Help Section */
+    .peers-help { 
+      margin-top: 1rem; border-top: 1px solid #f0f4fb; padding-top: 1rem;
+      display: none;
+    }
+    .peer-card {
+      background: #f8fafc; border-radius: 8px; padding: 10px;
+      margin-bottom: 8px; border: 1px solid #edf2f7;
+    }
+    .peer-name { font-size: 0.85rem; font-weight: 700; color: var(--vnr-dark); }
+    .peer-topic { font-size: 0.75rem; color: #6b7a99; margin: 4px 0; }
+    .topic-tag { 
+      display: inline-block; background: #e2e8f0; color: #475569;
+      padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;
+      margin-right: 4px; margin-bottom: 4px;
+    }
+    .btn-action-small {
+      background: #fff; border: 1px solid #cbd5e0;
+      color: #4a5568; font-size: 0.7rem; font-weight: 600;
+      padding: 4px 10px; border-radius: 6px; cursor: pointer;
+      width: 100%; transition: all 0.2s;
+    }
+    .btn-action-small:hover { background: #4a5568; color: #fff; }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 1000;
+      display: none; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal {
+      background: #fff; border-radius: 16px; width: 400px;
+      padding: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+    .modal-header { margin-bottom: 1.5rem; }
+    .modal-header h3 { font-size: 1.2rem; font-weight: 800; color: var(--vnr-dark); }
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 6px; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0;
+      border-radius: 8px; outline: none; font-family: inherit; font-size: 0.9rem;
+    }
+    .btn-primary {
+      background: var(--vnr-blue); color: #fff; border: none; padding: 12px;
+      border-radius: 8px; font-weight: 700; width: 100%; cursor: pointer;
     }
 
-    .log-book {
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: var(--vnr-dark);
-    }
-
-    .log-time {
-      font-size: 0.78rem;
-      color: #6b7a99;
-      margin-top: 2px;
-    }
-
-    .loading {
-      text-align: center;
-      color: #6b7a99;
-      padding: 2rem;
-    }
-
-    .empty {
-      text-align: center;
-      color: #6b7a99;
-      padding: 2rem;
-      font-size: 0.9rem;
-    }
+    .topic-form { margin-top: 10px; display: flex; gap: 8px; }
+    .topic-form input { flex: 1; padding: 6px 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 0.8rem; }
+    .topic-btn { background: #1565c0; color: #fff; border: none; border-radius: 6px; padding: 0 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
   </style>
 </head>
 
@@ -420,13 +468,30 @@
   <div class="main">
     <div class="topbar">
       <h1 id="pageTitle">Browse Books</h1>
-      <div style="display:flex;align-items:center;gap:1.5rem;">
-        <div id="projectSearchInfo" style="display:none;font-size:0.85rem;color:var(--vnr-gold);font-weight:600;background:rgba(245,166,35,0.1);padding:4px 12px;border-radius:20px;">
-          Passed out students data
-        </div>
-        <div style="display:flex;align-items:center;gap:1rem;">
-          <span class="badge-student">STUDENT</span>
-          <span id="topbarName" style="font-size:0.9rem;color:#6b7a99;"></span>
+        <div style="display:flex;align-items:center;gap:1.5rem;">
+          <div id="projectSearchInfo" style="display:none;font-size:0.85rem;color:var(--vnr-gold);font-weight:600;background:rgba(245,166,35,0.1);padding:4px 12px;border-radius:20px;">
+            Passed out students data
+          </div>
+          
+          <!-- Notifications -->
+          <div class="notif-container" id="notifBtn" onclick="toggleNotifs(event)">
+            <span style="font-size: 1.2rem;">🔔</span>
+            <div class="notif-badge" id="notifBadge">0</div>
+            <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+              <div class="notif-header">
+                <h4>Notifications</h4>
+                <div class="mark-btn" onclick="readAllNotifs()">Mark all as read</div>
+              </div>
+              <div class="notif-list" id="notifList">
+                <div class="empty">No new notifications</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <span class="badge-student">STUDENT</span>
+            <span id="topbarName" style="font-size:0.9rem;color:#6b7a99;"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -490,6 +555,24 @@
     </div>
   </div>
 
+  <!-- Appointment Modal -->
+  <div class="modal-overlay" id="appointModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Book Appointment</h3>
+        <p id="appointExpertName" style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">With Expert</p>
+      </div>
+      <div class="form-group">
+        <label>Date & Time</label>
+        <input type="datetime-local" id="appointDateTime" />
+      </div>
+      <div style="display:flex; gap: 10px;">
+        <button class="btn-primary" style="background:#f1f5f9; color:#475569;" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" onclick="submitAppointment()">Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API = 'http://localhost:5000/api';
     const token = localStorage.getItem('token');
@@ -499,6 +582,52 @@
     document.getElementById('sidebarName').textContent = user.name || 'Student';
     document.getElementById('topbarName').textContent = user.name || '';
     document.getElementById('avatarLetter').textContent = (user.name || 'S')[0].toUpperCase();
+
+    // Notification Logic
+    function toggleNotifs(e) {
+      e.stopPropagation();
+      const d = document.getElementById('notifDropdown');
+      const isShowing = d.style.display === 'flex';
+      d.style.display = isShowing ? 'none' : 'flex';
+      if (!isShowing) loadNotifications();
+    }
+    window.onclick = () => document.getElementById('notifDropdown').style.display = 'none';
+
+    async function loadNotifications() {
+      try {
+        const res = await apiFetch(`/notifications/${user.id}`);
+        const data = await res.json();
+        const list = document.getElementById('notifList');
+        const badge = document.getElementById('notifBadge');
+        
+        const unreadCount = data.filter(n => !n.is_read).length;
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'block' : 'none';
+
+        if (!data.length) { list.innerHTML = '<div class="empty">No notifications</div>'; return; }
+        list.innerHTML = data.map(n => `
+          <div class="notif-item ${n.is_read ? '' : 'unread'}">
+            ${n.is_read ? '' : `<div class="mark-btn" onclick="markRead('${n._id}', event)">Mark read</div>`}
+            <p>${n.message}</p>
+            <span>${new Date(n.created_at).toLocaleString()}</span>
+          </div>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    async function markRead(id, e) {
+      e.stopPropagation();
+      await apiFetch(`/notifications/${id}/read`, { method: 'PATCH' });
+      loadNotifications();
+    }
+
+    async function readAllNotifs() {
+      await apiFetch(`/notifications/read-all/${user.id}`, { method: 'PATCH' });
+      loadNotifications();
+    }
+
+    setInterval(loadNotifications, 30000); // Check every 30s
+    loadNotifications();
 
     function apiFetch(url, opts = {}) {
       return fetch(`${API}${url}`, { ...opts, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...opts.headers } });
@@ -514,6 +643,7 @@
         return new Intl.DateTimeFormat('en-GB', options).format(d).replace(',', '');
       } catch (e) { return str; }
     }
+
 
     function showTab(tab, el) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -550,17 +680,35 @@
       const grid = document.getElementById('booksGrid');
       if (!books.length) { grid.innerHTML = '<div class="empty">No books found</div>'; return; }
       grid.innerHTML = books.map(b => `
-    <div class="book-card">
+    <div class="book-card" id="book-${b._id}">
       <div class="book-num">${b.bookNumber || 'N/A'}</div>
       <div class="book-title">${b.title}</div>
       <div class="book-author">${b.author || 'Unknown Author'}</div>
+      
+      <div class="rating-avg" style="margin-bottom: 12px;">
+        ${b.rating_count > 0 
+          ? `<span class="star-gold">★</span> <b>${b.avg_rating}</b> <span style="font-size:0.75rem; color:#6b7a99;">(${b.rating_count} ratings)</span>`
+          : '<span style="font-size:0.75rem; color:#6b7a99; font-style:italic;">No ratings yet</span>'}
+      </div>
+
       <div class="book-meta">
         <span class="meta-tag">📚 ${b.totalCopies} copies</span>
         <span class="meta-tag ${b.availableCopies > 0 ? 'meta-avail' : ''}">
           ${b.availableCopies > 0 ? '✓ Available' : 'All copies out'}
         </span>
       </div>
-      <button class="btn-read" onclick="readBook('${b._id}','${b.title.replace(/'/g, "\\'")}')">📖 Stay & Read</button>
+      
+      <div style="display:flex; gap: 8px;">
+        <button class="btn-read" onclick="readBook('${b._id}','${b.title.replace(/'/g, "\\'")}')">📖 Stay & Read</button>
+        <button class="btn-read" style="background:#f1f5f9; color:#475569; width: auto;" title="See Experts" onclick="toggleExperts('${b._id}')">🎓</button>
+      </div>
+
+      <div class="peers-help" id="peers-${b._id}">
+        <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 8px;">Students who can help:</div>
+        <div class="peers-list" id="peer-list-${b._id}">
+          <div class="loading">Loading experts...</div>
+        </div>
+      </div>
     </div>`).join('');
     }
 
@@ -683,6 +831,22 @@
         <div style="flex:1">
           <div class="log-book">${l.bookTitle}</div>
           <div class="log-time">${formatDate(l.createdAt)} — Status: <strong style="color:${l.status === 'reading' ? '#f5a623' : '#2ed573'}">${l.status.toUpperCase()}</strong></div>
+          
+          ${l.status === 'returned' && l.bookId ? `
+            <div style="margin-top: 10px; padding: 10px; background: #fcfdfe; border-radius: 8px; border: 1px solid #f0f4fb;">
+              <div style="display:flex; justify-content: space-between; align-items:center;">
+                 <span style="font-size:0.75rem; font-weight:700; color:#64748b;">Rate this book:</span>
+                 <div class="rating-stars" id="stars-${l._id}-${l.bookId}">
+                   ${[1, 2, 3, 4, 5].map(num => `<span onclick="submitRating('${l.bookId}', ${num}, '${l._id}')">★</span>`).join('')}
+                 </div>
+              </div>
+              <div class="topic-form">
+                <input type="text" id="topic-${l.bookId}" placeholder="What topic did you understand?" />
+                <button class="topic-btn" onclick="addTopic('${l.bookId}')">Add Topic</button>
+              </div>
+            </div>
+          ` : ''}
+
           ${l.status === 'reading' ? `<button class="btn-return" onclick="returnBook('${l._id}')">Return Book</button>` : ''}
         </div>
       </div>`).join('');
@@ -698,6 +862,99 @@
         loadHistory();
         loadBooks();
       } catch (e) { await VnrUI.showError('Error returning book.'); }
+    }
+
+    async function toggleExperts(bookId) {
+      const el = document.getElementById(`peers-${bookId}`);
+      if (el.style.display === 'block') { el.style.display = 'none'; return; }
+      el.style.display = 'block';
+      
+      try {
+        const res = await apiFetch(`/knowledge/${bookId}`);
+        const data = await res.json();
+        const list = document.getElementById(`peer-list-${bookId}`);
+        
+        if (!data.length) { list.innerHTML = '<div class="empty" style="padding:0.5rem; font-size:0.7rem;">No peer experts for this book yet.</div>'; return; }
+        
+        list.innerHTML = data.map(ex => `
+          <div class="peer-card">
+            <div class="peer-name">${ex.student_id.name}</div>
+            <div class="peer-topic">
+              <span class="topic-tag">${ex.topic}</span>
+            </div>
+            ${ex.student_id._id !== user.id ? `
+              <button class="btn-action-small" onclick="openAppointmentModal('${ex.student_id._id}', '${ex.student_id.name}', '${bookId}')">
+                📅 Book Appointment
+              </button>
+            ` : '<div style="font-size:0.65rem; color:#1a9145; font-weight:600;">(You)</div>'}
+          </div>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    let currentExpert = null;
+    let currentBookId = null;
+
+    function openAppointmentModal(expertId, expertName, bookId) {
+      currentExpert = expertId;
+      currentBookId = bookId;
+      document.getElementById('appointExpertName').textContent = `Expert: ${expertName}`;
+      document.getElementById('appointModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('appointModal').style.display = 'none';
+    }
+
+    async function submitAppointment() {
+      const dt = document.getElementById('appointDateTime').value;
+      if (!dt) { await VnrUI.showError('Please select a date and time.'); return; }
+      
+      try {
+        const res = await apiFetch('/appointments/book', {
+          method: 'POST',
+          body: JSON.stringify({ expert_id: currentExpert, book_id: currentBookId, slot_datetime: dt })
+        });
+        const d = await res.json();
+        if (!res.ok) { await VnrUI.showError(d.message); return; }
+        
+        await VnrUI.showSuccess('Appointment requested! The peer has been notified.');
+        closeModal();
+      } catch (e) { await VnrUI.showError('Failed to book appointment.'); }
+    }
+
+    async function submitRating(bookId, rating, trId) {
+      try {
+        const res = await apiFetch('/ratings/rate', {
+          method: 'POST',
+          body: JSON.stringify({ bookId, rating })
+        });
+        if (!res.ok) { const d = await res.json(); await VnrUI.showError(d.message); return; }
+        
+        // Highlight stars in UI
+        const stars = document.querySelectorAll(`#stars-${trId}-${bookId} span`);
+        stars.forEach((s, idx) => {
+          s.classList.toggle('active', idx < rating);
+        });
+        await VnrUI.showSuccess('Book rated! Average updated.');
+        loadBooks(); // Refresh book cards to show new avg
+      } catch (e) { await VnrUI.showError('Failed to submit rating.'); }
+    }
+
+    async function addTopic(bookId) {
+      const topic = document.getElementById(`topic-${bookId}`).value;
+      if (!topic) return;
+      
+      try {
+        const res = await apiFetch('/knowledge/add', {
+          method: 'POST',
+          body: JSON.stringify({ bookId, topic })
+        });
+        if (!res.ok) { const d = await res.json(); await VnrUI.showError(d.message); return; }
+        
+        await VnrUI.showSuccess('Knowledge shared! You are now an expert for this book.');
+        document.getElementById(`topic-${bookId}`).value = '';
+      } catch (e) { await VnrUI.showError('Failed to share knowledge.'); }
     }
 
     function logout() { localStorage.clear(); window.location.href = 'login.html'; }
