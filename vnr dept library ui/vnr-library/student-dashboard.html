@@ -466,6 +466,42 @@
     .status-pending { background: rgba(245, 166, 35, 0.1); color: #f5a623; }
     .status-confirmed { background: rgba(46, 213, 115, 0.1); color: #2ed573; }
     .status-done { background: rgba(26, 58, 107, 0.1); color: var(--vnr-blue); }
+
+    .topic-badge {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #4338ca;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .log-dates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+    .log-date-label { font-weight: 600; color: #475569; }
+
+    .book-data-badge {
+      display: inline-block;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+      border: 1px solid #e2e8f0;
+    }
   </style>
 </head>
 
@@ -689,6 +725,43 @@
       } catch (e) { return str; }
     }
 
+    function formatHistoryDate(str) {
+      if (!str || str === '-') return '-';
+      try {
+        // Try to parse the IST string if it's in format "27 Feb 2026 16:40:18"
+        // Or if it's a standard date string
+        let d;
+        if (/^\d{2} [A-Z][a-z]{2} \d{4}/.test(str)) {
+          // Re-formatting string slightly if needed for better browser parsing or just using it
+          // Standard JS Date can usually parse "DD MMM YYYY HH:mm:ss"
+          d = new Date(str);
+        } else {
+          d = new Date(str);
+        }
+
+        if (isNaN(d.getTime())) return str;
+
+        const options = { 
+          day: '2-digit', 
+          month: 'short', 
+          year: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          hour12: true 
+        };
+        const formatted = new Intl.DateTimeFormat('en-GB', options).format(d);
+        // Desired: (01/Jan/2025, 02:20 PM)
+        // Intl en-GB with hour12: true gives "DD MMM YYYY, HH:mm am/pm"
+        const parts = formatted.split(' ');
+        const day = parts[0];
+        const month = parts[1];
+        const year = parts[2].replace(',', '');
+        const time = parts[3] + ' ' + (parts[4] || '').toUpperCase();
+        
+        return `(${day}/${month}/${year}, ${time})`;
+      } catch (e) { return str; }
+    }
+
 
     function showTab(tab, el) {
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -867,35 +940,54 @@
 
     async function loadHistory() {
       try {
-        const res = await apiFetch('/transactions/my');
-        const logs = await res.json();
+        const [trRes, knRes] = await Promise.all([
+          apiFetch('/transactions/my'),
+          apiFetch('/knowledge/my/all')
+        ]);
+        const logs = await trRes.json();
+        const knowledge = await knRes.json();
+        
         const el = document.getElementById('historyList');
         if (!logs.length) { el.innerHTML = '<div class="empty">No reading history yet. Start reading a book!</div>'; return; }
-        el.innerHTML = logs.map(l => `
-      <div class="log-item">
-        <div class="log-icon">${l.type === 'reading' ? '📖' : '📦'}</div>
-        <div style="flex:1">
-          <div class="log-book">${l.bookTitle}</div>
-          <div class="log-time">${formatDate(l.createdAt)} — Status: <strong style="color:${l.status === 'reading' ? '#f5a623' : '#2ed573'}">${l.status.toUpperCase()}</strong></div>
+        
+        el.innerHTML = logs.map(l => {
+          // Find topics for this book
+          const bookTopics = knowledge.filter(k => k.book_id?._id === l.bookId).map(k => k.topic);
           
-          ${l.status === 'returned' && l.bookId ? `
-            <div style="margin-top: 10px; padding: 10px; background: #fcfdfe; border-radius: 8px; border: 1px solid #f0f4fb;">
-              <div style="display:flex; justify-content: space-between; align-items:center;">
-                 <span style="font-size:0.75rem; font-weight:700; color:#64748b;">Rate this book:</span>
-                 <div class="rating-stars" id="stars-${l._id}-${l.bookId}">
-                   ${[1, 2, 3, 4, 5].map(num => `<span onclick="submitRating('${l.bookId}', ${num}, '${l._id}')">★</span>`).join('')}
-                 </div>
-              </div>
-              <div class="topic-form">
-                <input type="text" id="topic-${l.bookId}" placeholder="What topic did you understand?" />
-                <button class="topic-btn" onclick="addTopic('${l.bookId}')">Add Topic</button>
-              </div>
-            </div>
-          ` : ''}
+          return `
+            <div class="log-item">
+              <div class="log-icon">${l.type === 'reading' ? '📖' : '📦'}</div>
+              <div style="flex:1">
+                <div class="log-book">
+                  ${l.bookTitle}
+                  ${l.bookNumber ? `<span class="book-data-badge">#${l.bookNumber}</span>` : ''}
+                  ${bookTopics.map(t => `<span class="topic-badge">${t}</span>`).join('')}
+                </div>
+                <div class="log-dates">
+                  <div><span class="log-date-label">Taken:</span> ${formatHistoryDate(l.lentAt || l.createdAt)}</div>
+                  ${l.returnedAt ? `<div><span class="log-date-label">Returned:</span> ${formatHistoryDate(l.returnedAt)}</div>` : ''}
+                  <div><span class="log-date-label">Status:</span> <strong style="color:${l.status === 'reading' ? '#f5a623' : '#2ed573'}">${l.status.toUpperCase()}</strong></div>
+                </div>
+                
+                ${l.status === 'returned' && l.bookId ? `
+                  <div style="margin-top: 10px; padding: 10px; background: #fcfdfe; border-radius: 8px; border: 1px solid #f0f4fb;">
+                    <div style="display:flex; justify-content: space-between; align-items:center;">
+                       <span style="font-size:0.75rem; font-weight:700; color:#64748b;">Rate this book:</span>
+                       <div class="rating-stars" id="stars-${l._id}-${l.bookId}">
+                         ${[1, 2, 3, 4, 5].map(num => `<span onclick="submitRating('${l.bookId}', ${num}, '${l._id}')">★</span>`).join('')}
+                       </div>
+                    </div>
+                    <div class="topic-form">
+                      <input type="text" id="topic-${l.bookId}" placeholder="What topic did you understand?" />
+                      <button class="topic-btn" onclick="addTopic('${l.bookId}')">Add Topic</button>
+                    </div>
+                  </div>
+                ` : ''}
 
-          ${l.status === 'reading' ? `<button class="btn-return" onclick="returnBook('${l._id}')">Return Book</button>` : ''}
-        </div>
-      </div>`).join('');
+                ${l.status === 'reading' ? `<button class="btn-return" onclick="returnBook('${l._id}')">Return Book</button>` : ''}
+              </div>
+            </div>`;
+        }).join('');
       } catch (e) { console.error(e); }
     }
 
