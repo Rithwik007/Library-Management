@@ -1063,7 +1063,7 @@
               <span class="topic-tag">${ex.topic}</span>
             </div>
             ${ex.student_id._id !== user.id ? `
-              <button class="btn-action-small" onclick="openAppointmentModal('${ex.student_id._id}', '${ex.student_id.name}', '${bookId}')">
+              <button class="btn-action-small" onclick="openAppointmentModal('${ex.student_id._id}', '${ex.student_id.name}', '${bookId}', '${ex.topic.replace(/'/g, "\\'")}')">
                 🧠 Request Knowledge
               </button>
             ` : '<div style="font-size:0.65rem; color:#1a9145; font-weight:600;">(You)</div>'}
@@ -1075,10 +1075,11 @@
     let currentExpert = null;
     let currentBookId = null;
 
-    function openAppointmentModal(expertId, expertName, bookId) {
+    function openAppointmentModal(expertId, expertName, bookId, topic) {
       currentExpert = expertId;
       currentBookId = bookId;
       document.getElementById('appointExpertName').textContent = `Expert: ${expertName}`;
+      document.getElementById('appointTopic').value = topic;
       document.getElementById('appointModal').style.display = 'flex';
     }
 
@@ -1155,7 +1156,7 @@
               <div class="apt-info">
                 <b>${a.book_id.title}</b>
                 <span>${isExpert ? 'Learner: ' + a.requester_id.name : 'Expert: ' + a.expert_id.name}</span>
-                <span style="display:block; margin-top:2px;">🕒 ${new Date(a.slot_datetime).toLocaleString()}</span>
+                <span style="display:block; margin-top:2px;">📝 Topic: <b>${a.topic}</b></span>
               </div>
               <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
                 <span class="status-badge status-${a.status}">${a.status}</span>
