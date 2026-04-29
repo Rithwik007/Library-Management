@@ -591,7 +591,7 @@
   </div>
 
   <script>
-    const API = 'http://localhost:5000/api';
+    const API = 'https://library-management-backend-seven-delta.vercel.app/api';
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (!token || user.role !== 'admin') window.location.href = 'login.html';
