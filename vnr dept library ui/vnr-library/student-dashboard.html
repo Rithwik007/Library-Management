@@ -832,14 +832,21 @@
     async function loadBooks() {
       try {
         const res = await apiFetch('/books');
-        allBooks = await res.json();
+        const data = await res.json();
+        if (!res.ok) {
+          document.getElementById('booksGrid').innerHTML = `<div class="empty">Error: ${data.message || 'Failed to load books'}</div>`;
+          return;
+        }
+        allBooks = data;
         renderBooks(allBooks);
-      } catch (e) { document.getElementById('booksGrid').innerHTML = '<div class="empty">Failed to load books</div>'; }
+      } catch (e) { 
+        document.getElementById('booksGrid').innerHTML = '<div class="empty">Failed to load books. Check connection.</div>'; 
+      }
     }
 
     function renderBooks(books) {
       const grid = document.getElementById('booksGrid');
-      if (!books.length) { grid.innerHTML = '<div class="empty">No books found</div>'; return; }
+      if (!Array.isArray(books) || !books.length) { grid.innerHTML = '<div class="empty">No books found matching your search.</div>'; return; }
       grid.innerHTML = books.map(b => `
     <div class="book-card" id="book-${b._id}">
       <div class="book-num">${b.bookNumber || 'N/A'}</div>
@@ -888,7 +895,12 @@
         const grid = document.getElementById('projectsGrid');
         grid.innerHTML = '<div class="loading">Loading projects...</div>';
         const res = await apiFetch('/projects');
-        allProjects = await res.json();
+        const data = await res.json();
+        if (!res.ok) {
+           grid.innerHTML = `<div class="empty">Error: ${data.message || 'Failed to load projects'}</div>`;
+           return;
+        }
+        allProjects = data;
         renderProjects(allProjects);
       } catch (e) { document.getElementById('projectsGrid').innerHTML = '<div class="empty">Failed to load projects</div>'; }
     }
@@ -926,7 +938,12 @@
         const grid = document.getElementById('othersGrid');
         grid.innerHTML = '<div class="loading">Loading...</div>';
         const res = await apiFetch('/others');
-        allOthers = await res.json();
+        const data = await res.json();
+        if (!res.ok) {
+           grid.innerHTML = `<div class="empty">Error: ${data.message || 'Failed to load items'}</div>`;
+           return;
+        }
+        allOthers = data;
         renderOthers(allOthers);
       } catch (e) { document.getElementById('othersGrid').innerHTML = '<div class="empty">Failed to load items</div>'; }
     }
