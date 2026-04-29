@@ -5,6 +5,13 @@ require('dotenv').config();
 
 const app = express();
 
+const webpush = require('web-push');
+webpush.setVapidDetails(
+  process.env.VAPID_SUBJECT || 'mailto:admin@library.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
+
 app.use(cors());
 app.use(express.json());
 

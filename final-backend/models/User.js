@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
   studentId:  { type: String },
   department: { type: String },
   phone:      { type: String },
+  pushSubscription: { type: Object },
   isActive:   { type: Boolean, default: true }
 }, { timestamps: true });
 

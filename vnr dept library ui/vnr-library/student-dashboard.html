@@ -521,7 +521,7 @@
       <div class="nav-item" onclick="showTab('projects', this)"><span>📂</span><span>Projects</span></div>
       <div class="nav-item" onclick="showTab('others', this)"><span>📦</span><span>Others</span></div>
       <div class="nav-item" onclick="showTab('history', this)"><span>📋</span><span>My Reading History</span></div>
-      <div class="nav-item" onclick="showTab('appointments', this)"><span>📅</span><span>My Appointments</span></div>
+      <div class="nav-item" onclick="showTab('appointments', this)"><span>🧠</span><span>My Knowledge Requests</span></div>
     </nav>
     <div class="sidebar-footer">
       <button class="logout-btn" onclick="logout()"><span>🚪</span><span>Sign Out</span></button>
@@ -617,15 +617,15 @@
       <!-- APPOINTMENTS -->
       <div class="tab-content" id="tab-appointments">
         <div class="card">
-          <h3>Requested Study Sessions</h3>
-          <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Sessions you've requested from peer experts.</p>
+          <h3>Requested Knowledge</h3>
+          <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Topics you've requested to learn from peer experts.</p>
           <div id="myRequestsList">
             <div class="loading">Loading...</div>
           </div>
         </div>
 
         <div class="card" style="margin-top: 2rem;">
-          <h3>Incoming Expert Requests</h3>
+          <h3>Incoming Knowledge Requests</h3>
           <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 1rem;">Students wanting your help with books you've understood.</p>
           <div id="expertRequestsList">
             <div class="loading">Loading...</div>
@@ -640,12 +640,12 @@
   <div class="modal-overlay" id="appointModal">
     <div class="modal">
       <div class="modal-header">
-        <h3>Book Appointment</h3>
+        <h3>Request Knowledge</h3>
         <p id="appointExpertName" style="font-size: 0.85rem; color: #64748b; margin-top: 4px;">With Expert</p>
       </div>
       <div class="form-group">
-        <label>Date & Time</label>
-        <input type="datetime-local" id="appointDateTime" />
+        <label>Topic</label>
+        <input type="text" id="appointTopic" placeholder="What topic do you want to learn?" />
       </div>
       <div style="display:flex; gap: 10px;">
         <button class="btn-primary" style="background:#f1f5f9; color:#475569;" onclick="closeModal()">Cancel</button>
@@ -663,6 +663,48 @@
     document.getElementById('sidebarName').textContent = user.name || 'Student';
     document.getElementById('topbarName').textContent = user.name || '';
     document.getElementById('avatarLetter').textContent = (user.name || 'S')[0].toUpperCase();
+
+    // --- Web Push Subscription Logic ---
+    const PUBLIC_VAPID_KEY = 'BHiktC7Cl3rh77kP-E-xljEqEZQpwGKdsUmS9_NIzsopNJJqRJE1-jDFbNU7ybCcO-mkp-1jh86h2eLzNPrjdVQ';
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) { outputArray[i] = rawData.charCodeAt(i); }
+      return outputArray;
+    }
+
+    async function initWebPush() {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        try {
+          const register = await navigator.serviceWorker.register('/sw.js');
+          console.log('SW registered');
+
+          const permission = await Notification.requestPermission();
+          if (permission === 'granted') {
+            const subscription = await register.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY)
+            });
+
+            // Send subscription to backend
+            await apiFetch('/users/subscribe', {
+              method: 'POST',
+              body: JSON.stringify({ subscription })
+            });
+            console.log('Push subscription saved');
+          }
+        } catch (err) {
+          console.error('Web Push Error:', err);
+        }
+      }
+    }
+    
+    // Call on load
+    initWebPush();
+    // -----------------------------------
 
     // Notification Logic
     function toggleNotifs(e) {
@@ -1022,7 +1064,7 @@
             </div>
             ${ex.student_id._id !== user.id ? `
               <button class="btn-action-small" onclick="openAppointmentModal('${ex.student_id._id}', '${ex.student_id.name}', '${bookId}')">
-                📅 Book Appointment
+                🧠 Request Knowledge
               </button>
             ` : '<div style="font-size:0.65rem; color:#1a9145; font-weight:600;">(You)</div>'}
           </div>
@@ -1045,20 +1087,20 @@
     }
 
     async function submitAppointment() {
-      const dt = document.getElementById('appointDateTime').value;
-      if (!dt) { await VnrUI.showError('Please select a date and time.'); return; }
+      const topic = document.getElementById('appointTopic').value.trim();
+      if (!topic) { await VnrUI.showError('Please enter a topic.'); return; }
       
       try {
         const res = await apiFetch('/appointments/book', {
           method: 'POST',
-          body: JSON.stringify({ expert_id: currentExpert, book_id: currentBookId, slot_datetime: dt })
+          body: JSON.stringify({ expert_id: currentExpert, book_id: currentBookId, topic })
         });
         const d = await res.json();
         if (!res.ok) { await VnrUI.showError(d.message); return; }
         
-        await VnrUI.showSuccess('Appointment requested! The peer has been notified.');
+        await VnrUI.showSuccess('Knowledge requested! The peer has been notified.');
         closeModal();
-      } catch (e) { await VnrUI.showError('Failed to book appointment.'); }
+      } catch (e) { await VnrUI.showError('Failed to request knowledge.'); }
     }
 
     async function submitRating(bookId, rating, trId) {
