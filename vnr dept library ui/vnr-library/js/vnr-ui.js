@@ -1,5 +1,5 @@
 /**
- * VNR Department Library - UI Component System
+ * VNR CSE Department Library - UI Component System
  */
 
 const VnrUI = {

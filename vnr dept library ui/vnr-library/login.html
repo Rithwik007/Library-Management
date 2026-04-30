@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login — VNR VJIET Department Library</title>
+  <title>Login — VNR VJIET CSE Department Library</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
@@ -296,11 +296,11 @@
       <img src="assets/logo.png" alt="VNR VJIET" />
       <div class="left-logo-text">
         <span>VNR VJIET</span>
-        <span>Department Library</span>
+        <span>CSE Department Library</span>
       </div>
     </div>
-    <h1>Welcome to<br /><span>VNR Library</span><br />Portal</h1>
-    <p>Access the complete digital library management system of Vallurupalli Nageswara Rao Vignana Jyothi Institute.</p>
+    <h1>Welcome to<br /><span>VNR CSE Department Library</span><br />Portal</h1>
+    <p>Access the complete digital CSE department library management system of Vallurupalli Nageswara Rao Vignana Jyothi Institute.</p>
     <div class="left-features">
       <div><span>📚</span><span>956+ Books across all departments</span></div>
       <div><span>🔄</span><span>Borrow, return and track books</span></div>
@@ -313,7 +313,7 @@
   <div class="right-panel">
     <div class="login-box">
       <h2>Sign In</h2>
-      <p>Enter your credentials to access the library portal</p>
+      <p>Enter your credentials to access the CSE department library portal</p>
 
       <div class="error-msg" id="errorMsg"></div>
 
@@ -335,7 +335,7 @@
         <input type="password" id="password" placeholder="Enter your password" />
       </div>
 
-      <button class="login-btn" onclick="login()">Sign In to Library Portal</button>
+      <button class="login-btn" onclick="login()">Sign In to CSE Department Library Portal</button>
 
 
 
@@ -373,7 +373,7 @@
         if (!res.ok) {
           errorMsg.textContent = data.message || 'Login failed. Please check your credentials.';
           errorMsg.style.display = 'block';
-          btn.textContent = 'Sign In to Library Portal'; btn.disabled = false;
+          btn.textContent = 'Sign In to CSE Department Library Portal'; btn.disabled = false;
           return;
         }
 
@@ -389,7 +389,7 @@
       } catch (err) {
         errorMsg.textContent = 'Cannot connect to server. Make sure backend is running on port 5000.';
         errorMsg.style.display = 'block';
-        btn.textContent = 'Sign In to Library Portal'; btn.disabled = false;
+        btn.textContent = 'Sign In to CSE Department Library Portal'; btn.disabled = false;
       }
     }
 

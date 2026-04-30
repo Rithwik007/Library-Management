@@ -41,7 +41,7 @@ app.use("/api/appointments", require("./routes/appointments"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/ratings", require("./routes/ratings"));
 
-app.get('/', (req, res) => res.send('Library API is running ✅'));
+app.get('/', (req, res) => res.send('CSE Department Library API is running ✅'));
 
 const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== 'production') {
