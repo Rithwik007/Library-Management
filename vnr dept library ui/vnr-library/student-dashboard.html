@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Dashboard — VNR VJIET CSE Department Library</title>
+  <title>Student Dashboard — VNR VJIET Department Library</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
@@ -563,7 +563,7 @@
       <div class="tab-content active" id="tab-books">
         <div class="notice-bar">
           <span>ℹ️</span>
-          <p>As a student, you can read books at the CSE department library. Borrowing is available for faculty only.</p>
+          <p>As a student, you can read books at the library. Borrowing is available for faculty only.</p>
         </div>
         <div class="search-bar">
           <input type="text" id="searchInput" placeholder="Search books by title, author or number..."
@@ -593,7 +593,7 @@
       <div class="tab-content" id="tab-others">
         <div class="notice-bar" style="background: linear-gradient(135deg, rgba(46, 213, 115, 0.08), rgba(46, 213, 115, 0.05)); border-color: rgba(46, 213, 115, 0.1);">
           <span>ℹ️</span>
-          <p>Browse through secondary resources. You can read these items at the CSE department library.</p>
+          <p>Browse through secondary resources. You can read these items at the library.</p>
         </div>
         <div class="search-bar">
           <input type="text" id="otherSearchInput" placeholder="Search others by title, description or ID..."
@@ -820,7 +820,7 @@
       document.getElementById('pageTitle').textContent = titles[tab];
       document.getElementById('projectSearchInfo').style.display = (tab === 'projects' || tab === 'others') ? 'block' : 'none';
       if (tab === 'projects') document.getElementById('projectSearchInfo').textContent = 'Passed out students data';
-      if (tab === 'others') document.getElementById('projectSearchInfo').textContent = 'Secondary CSE department library resources';
+      if (tab === 'others') document.getElementById('projectSearchInfo').textContent = 'Secondary library resources';
 
       if (tab === 'history') loadHistory();
       if (tab === 'projects') loadProjects();
